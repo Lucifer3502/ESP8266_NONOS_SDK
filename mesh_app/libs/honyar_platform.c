@@ -99,7 +99,7 @@ static void ICACHE_FLASH_ATTR honyar_task(void *arg)
 
 static void ICACHE_FLASH_ATTR _honyar_platform_init(void)
 {
-    uart_div_modify(1, UART_CLK_FREQ / HONYAR_PLATFORM_DEBUG_BAUDRATE);
+    UART_SetBaudrate(1, HONYAR_PLATFORM_DEBUG_BAUDRATE);
     system_soft_wdt_restart();
 }
 

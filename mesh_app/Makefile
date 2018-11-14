@@ -79,6 +79,7 @@ LINKFLAGS_eagle.app.v6 = \
 	-lwps \
 	-lmesh \
 	-lsmartconfig \
+	-ldriver \
 	$(DEP_LIBS_eagle.app.v6)					\
 	-Wl,--end-group
 
