@@ -8,10 +8,20 @@
 
 #define TASK_CYCLE_TM_MS  10
 
-#define honyar_malloc os_malloc
-#define honyar_free os_free
 
 typedef  void (*task_func_t)(void *parm);
+
+void honyar_usleep(uint32_t us);
+
+void honyar_msleep(uint32_t ms);
+
+void honyar_sleep(uint32_t s);
+
+void honyar_sys_reboot(uint32_t now);
+
+void *honyar_malloc(uint32_t size);
+
+void honyar_free(void *ptr);
 
 int32_t honyar_add_task(task_func_t func, void *parm, uint32_t cycle);
 

@@ -13,6 +13,57 @@ struct honyar_task{
 
 static struct honyar_task g_honyar_tasks[TASK_MAX_NUM];
 static os_timer_t g_honyar_platform_timer;
+static uint8_t g_reboot;
+
+void ICACHE_FLASH_ATTR honyar_usleep(uint32_t us)
+{
+    os_delay_us(us);
+}
+
+void ICACHE_FLASH_ATTR honyar_msleep(uint32_t ms)
+{
+    os_delay_us(ms * 1000);
+}
+
+void ICACHE_FLASH_ATTR honyar_sleep(uint32_t s)
+{
+    honyar_msleep(s * 1000);
+}
+
+void ICACHE_FLASH_ATTR honyar_sys_reboot(uint32_t now)
+{
+    if(now) {
+		hy_debug("eg_platform reboot\r\n");
+        honyar_msleep(1000);
+        system_restart();
+        while(1);
+    } else {
+        g_reboot = 1;
+    }
+}
+
+void ICACHE_FLASH_ATTR _honyar_sys_reboot(void)
+{
+    honyar_sys_reboot(1);
+}
+
+void ICACHE_FLASH_ATTR *honyar_malloc(uint32_t size)
+{
+    void *new_data = (void *)os_malloc(size);
+    
+    if (NULL == new_data) {
+        hy_fatal("malloc failed\r\n");
+        honyar_sys_reboot(1);
+    } else {
+        return new_data;
+    }
+}
+
+void ICACHE_FLASH_ATTR honyar_free(void *ptr)
+{
+    os_free(ptr);
+}
+
 
 int32_t ICACHE_FLASH_ATTR honyar_add_task(task_func_t func, void *parm, uint32_t cycle)
 {
@@ -95,6 +146,10 @@ static void ICACHE_FLASH_ATTR honyar_task(void *arg)
     cycle++;
     system_soft_wdt_feed();
     os_timer_arm(&g_honyar_platform_timer, TASK_CYCLE_TM_MS, false);
+
+    if(g_reboot) {
+        system_restart();
+    }
 }
 
 static void ICACHE_FLASH_ATTR _honyar_platform_init(void)
