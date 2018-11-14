@@ -22,4 +22,4 @@ If you donot use Non-FOTA bin, eagle.irom0.text.bin and irom0.text MUST be downl
 
 ## mesh sdk version
 - branch: origin/release/v2.2.x
-- hash: 1f492fbe19a2c2d1761f6aad6bf92af21b6c086b
+- hash: c02ab5a4288cdbf2162e82ea49d0d3394ea9b13b
