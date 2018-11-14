@@ -18,5 +18,6 @@
 #include "honyar_upgrade.h"
 #include "honyar_flash.h"
 #include "honyar_uart.h"
+#include "honyar_md5.h"
 
 #endif
