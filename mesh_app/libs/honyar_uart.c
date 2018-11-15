@@ -19,6 +19,7 @@ void _uart0_one_byte_enqueue(uint8_t ch)
     
     if(front == ((tail + 1) & (UART_RECV_BUF_SIZE - 1))) {
         //full;
+        os_printf("buff full\r\n");
         return;
     }
     g_uart0_buf.buf[tail] = ch;
@@ -31,7 +32,7 @@ uint32_t honyar_uart_read(uint8_t *buf, uint32_t len, uint32_t tm_out)
     uint32_t rbytes = 0;
     uint32_t count = 0;
     
-    if(0 == len)
+    if(NULL == buf || 0 == len)
         return len;
     
     uart_read_buff_t *rx_hd = &g_uart0_buf;

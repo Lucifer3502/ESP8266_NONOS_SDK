@@ -43,7 +43,7 @@ LOCAL struct UartBuffer* pRxBuffer = NULL;
 #define uart_recvTaskQueueLen    10
 os_event_t    uart_recvTaskQueue[uart_recvTaskQueueLen];
 
-#define DBG  
+#define DBG
 #define DBG1 uart1_sendStr_no_wait
 #define DBG2 os_printf
 
@@ -95,7 +95,7 @@ uart_config(uint8 uart_no)
         ((110 & UART_RX_FLOW_THRHD) << UART_RX_FLOW_THRHD_S) |
         UART_RX_FLOW_EN |   //enbale rx flow control
         #endif
-        (0x02 & UART_RX_TOUT_THRHD) << UART_RX_TOUT_THRHD_S |
+        (0x10 & UART_RX_TOUT_THRHD) << UART_RX_TOUT_THRHD_S |
         UART_RX_TOUT_EN|
         ((0x10 & UART_TXFIFO_EMPTY_THRHD)<<UART_TXFIFO_EMPTY_THRHD_S));//wjl 
         #if UART_HW_CTS

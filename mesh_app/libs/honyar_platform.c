@@ -1,7 +1,7 @@
 
 #include "honyar_common.h"
 
-#define HONYAR_PLATFORM_DEBUG_BAUDRATE  115200
+
 
 struct honyar_task{
     uint32_t enable;
@@ -152,10 +152,21 @@ static void ICACHE_FLASH_ATTR honyar_task(void *arg)
     }
 }
 
+static void honyar_platform_task(void *parm)
+{
+
+    hy_printf("SYS TM: %u, HEAP SIZE: %u\r\n",
+        system_get_time(), system_get_free_heap_size());
+
+    hy_printf("\r\n");
+}
+
 static void ICACHE_FLASH_ATTR _honyar_platform_init(void)
 {
     uart_init(BIT_RATE_115200, BIT_RATE_115200);
     system_soft_wdt_restart();
+    system_print_meminfo();
+    honyar_add_task(honyar_platform_task, NULL, 10000 / TASK_CYCLE_TM_MS);
 }
 
 void ICACHE_FLASH_ATTR honyar_platform_init(void)

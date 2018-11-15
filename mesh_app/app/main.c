@@ -19,12 +19,11 @@ static void ICACHE_FLASH_ATTR uart_recv_test(void *parm)
         hy_info("uart read %d bytes\r\n", rbytes);
         honyar_uart_write("hello world\r\n", strlen("hello world\r\n"));
     }
-    
 }
 
 static void ICACHE_FLASH_ATTR uart_test(void)
 {
-    honyar_uart_init(9600);
+    honyar_uart_init(115200);
     honyar_add_task(uart_recv_test, NULL, 0);
 }
 
@@ -33,5 +32,7 @@ void ICACHE_FLASH_ATTR user_init(void)
     honyar_platform_init();
 
     network_test();
+
+    uart_test();
 }
 
