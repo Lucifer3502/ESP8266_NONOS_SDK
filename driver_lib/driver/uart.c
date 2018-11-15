@@ -47,6 +47,7 @@ os_event_t    uart_recvTaskQueue[uart_recvTaskQueueLen];
 #define DBG1 uart1_sendStr_no_wait
 #define DBG2 os_printf
 
+extern void _uart0_one_byte_enqueue(uint8_t ch);
 
 LOCAL void uart0_rx_intr_handler(void *para);
 
@@ -299,7 +300,8 @@ uart_recvTask(os_event_t *events)
         uint8 idx=0;
         for(idx=0;idx<fifo_len;idx++) {
             d_tmp = READ_PERI_REG(UART_FIFO(UART0)) & 0xFF;
-            uart_tx_one_char(UART0, d_tmp);
+            //uart_tx_one_char(UART0, d_tmp);
+            _uart0_one_byte_enqueue(d_tmp);
         }
         WRITE_PERI_REG(UART_INT_CLR(UART0), UART_RXFIFO_FULL_INT_CLR|UART_RXFIFO_TOUT_INT_CLR);
         uart_rx_intr_enable(UART0);
@@ -337,7 +339,7 @@ uart_init(UartBautRate uart0_br, UartBautRate uart1_br)
 
     /*option 2: output from uart1,uart1 output will not wait , just for output debug info */
     /*os_printf output uart data via uart1(GPIO2)*/
-    //os_install_putc1((void *)uart1_write_char);    //use this one to output debug information via uart1 //
+    os_install_putc1((void *)uart1_write_char);    //use this one to output debug information via uart1 //
 
     /*option 3: output from uart0 will skip current byte if fifo is full now... */
     /*see uart0_write_char_no_wait:you can output via a buffer or output directly */

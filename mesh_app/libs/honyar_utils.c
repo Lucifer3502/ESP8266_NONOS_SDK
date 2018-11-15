@@ -42,7 +42,7 @@ void hex_printf(uint8_t *head, uint8_t *buf, uint32_t len)
     hy_printf("\r\n");
 }
 
-int hex2byte(unsigned char *dest, int dest_len, unsigned char *src, int src_len)
+int hy_hex2byte(unsigned char *dest, int dest_len, unsigned char *src, int src_len)
 {
     if((src_len % 2) || (dest_len < src_len / 2))
         return -1;
@@ -74,7 +74,7 @@ int hex2byte(unsigned char *dest, int dest_len, unsigned char *src, int src_len)
     return 0;
 }
 
-int32_t byte2hex(unsigned char *dest, int dest_len, unsigned char *src, int src_len)
+int32_t hy_byte2hex(unsigned char *dest, int dest_len, unsigned char *src, int src_len)
 {
     uint32_t i;
     if(dest_len < src_len * 2 || !dest || !src) {

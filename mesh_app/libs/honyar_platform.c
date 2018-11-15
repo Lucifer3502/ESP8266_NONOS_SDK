@@ -154,7 +154,7 @@ static void ICACHE_FLASH_ATTR honyar_task(void *arg)
 
 static void ICACHE_FLASH_ATTR _honyar_platform_init(void)
 {
-    UART_SetBaudrate(1, HONYAR_PLATFORM_DEBUG_BAUDRATE);
+    uart_init(BIT_RATE_115200, BIT_RATE_115200);
     system_soft_wdt_restart();
 }
 
