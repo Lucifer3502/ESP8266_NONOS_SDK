@@ -20,5 +20,8 @@
 #include "honyar_uart.h"
 #include "honyar_md5.h"
 #include "honyar_http_upgrade.h"
+#include "honyar_utils.h"
+#include "honyar_wifi.h"
+#include "honyar_types.h"
 
 #endif

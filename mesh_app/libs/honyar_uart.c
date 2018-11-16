@@ -26,7 +26,7 @@ void _uart0_one_byte_enqueue(uint8_t ch)
     g_uart0_buf.tail = (tail + 1) & (UART_RECV_BUF_SIZE - 1);
 }
 
-uint32_t honyar_uart_read(uint8_t *buf, uint32_t len, uint32_t tm_out)
+uint32_t ICACHE_FLASH_ATTR honyar_uart_read(uint8_t *buf, uint32_t len, uint32_t tm_out)
 {
     uint32_t rbytes = 0;
     uint32_t count = 0;
@@ -56,7 +56,7 @@ uint32_t honyar_uart_read(uint8_t *buf, uint32_t len, uint32_t tm_out)
     return rbytes;
 }
 
-uint32_t honyar_uart_write(const uint8_t *buf, uint32_t len)
+uint32_t ICACHE_FLASH_ATTR honyar_uart_write(const uint8_t *buf, uint32_t len)
 {  
     uint32_t i;
     for(i = 0; i < len; i++) {
@@ -66,7 +66,7 @@ uint32_t honyar_uart_write(const uint8_t *buf, uint32_t len)
     return len;
 }
 
-int32_t honyar_uart_init(uint32_t baudrate)
+int32_t ICACHE_FLASH_ATTR honyar_uart_init(uint32_t baudrate)
 {
     UART_SetBaudrate(UART0, baudrate);
     //uart_init(baudrate, 115200);

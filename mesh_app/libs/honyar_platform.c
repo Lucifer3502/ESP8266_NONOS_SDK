@@ -152,7 +152,7 @@ static void ICACHE_FLASH_ATTR honyar_task(void *arg)
     }
 }
 
-static void honyar_platform_task(void *parm)
+static void ICACHE_FLASH_ATTR honyar_platform_task(void *parm)
 {
 
     hy_printf("SYS TM: %u, HEAP SIZE: %u\r\n",

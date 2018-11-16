@@ -17,7 +17,7 @@ static void ICACHE_FLASH_ATTR uart_recv_test(void *parm)
     uint32_t rbytes = honyar_uart_read(buf, len, 30);
     if(rbytes) {
         hy_info("uart read %d bytes\r\n", rbytes);
-        honyar_uart_write("hello world\r\n", strlen("hello world\r\n"));
+        honyar_uart_write(buf, rbytes);
     }
 }
 
@@ -27,12 +27,23 @@ static void ICACHE_FLASH_ATTR uart_test(void)
     honyar_add_task(uart_recv_test, NULL, 0);
 }
 
+static void wifi_station_cb(uint8_t status)
+{
+    if(status == STATION_GOT_IP){
+        hy_info("wifi connected\r\n");
+        network_test();
+    } else {
+        hy_info("wifi status: %d\r\n", status);
+    }
+}
+
 void ICACHE_FLASH_ATTR user_init(void)
 {    
     honyar_platform_init();
 
-    network_test();
-
     uart_test();
+
+    honyar_wifi_init();
+    honyar_wifi_station_regist_statuscb(wifi_station_cb);
 }
 
