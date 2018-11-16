@@ -16,7 +16,7 @@ void _uart0_one_byte_enqueue(uint8_t ch)
 {
     uint32_t front = g_uart0_buf.front;
     uint32_t tail = g_uart0_buf.tail;
-    
+    //os_printf("r");
     if(front == ((tail + 1) & (UART_RECV_BUF_SIZE - 1))) {
         //full;
         os_printf("buff full\r\n");
@@ -25,7 +25,6 @@ void _uart0_one_byte_enqueue(uint8_t ch)
     g_uart0_buf.buf[tail] = ch;
     g_uart0_buf.tail = (tail + 1) & (UART_RECV_BUF_SIZE - 1);
 }
-
 
 uint32_t honyar_uart_read(uint8_t *buf, uint32_t len, uint32_t tm_out)
 {
@@ -47,6 +46,7 @@ uint32_t honyar_uart_read(uint8_t *buf, uint32_t len, uint32_t tm_out)
             buf[rbytes++] = rx_hd->buf[rx_hd->front++];
             rx_hd->front &= (UART_RECV_BUF_SIZE - 1);
             if(rbytes >= len) {
+                //os_printf("read buf full\r\n");
                 break;//full
             }
             count = 0;
@@ -69,5 +69,6 @@ uint32_t honyar_uart_write(const uint8_t *buf, uint32_t len)
 int32_t honyar_uart_init(uint32_t baudrate)
 {
     UART_SetBaudrate(UART0, baudrate);
+    //uart_init(baudrate, 115200);
     return 0;
 }

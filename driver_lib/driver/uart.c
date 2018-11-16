@@ -43,11 +43,12 @@ LOCAL struct UartBuffer* pRxBuffer = NULL;
 #define uart_recvTaskQueueLen    10
 os_event_t    uart_recvTaskQueue[uart_recvTaskQueueLen];
 
-#define DBG
+#define DBG 
 #define DBG1 uart1_sendStr_no_wait
 #define DBG2 os_printf
 
 extern void _uart0_one_byte_enqueue(uint8_t ch);
+LOCAL void do_uart_recv(void);
 
 LOCAL void uart0_rx_intr_handler(void *para);
 
@@ -90,12 +91,12 @@ uart_config(uint8 uart_no)
     if (uart_no == UART0){
         //set rx fifo trigger
         WRITE_PERI_REG(UART_CONF1(uart_no),
-        ((100 & UART_RXFIFO_FULL_THRHD) << UART_RXFIFO_FULL_THRHD_S) |
+        ((16 & UART_RXFIFO_FULL_THRHD) << UART_RXFIFO_FULL_THRHD_S) |
         #if UART_HW_RTS
         ((110 & UART_RX_FLOW_THRHD) << UART_RX_FLOW_THRHD_S) |
         UART_RX_FLOW_EN |   //enbale rx flow control
         #endif
-        (0x10 & UART_RX_TOUT_THRHD) << UART_RX_TOUT_THRHD_S |
+        (0x02 & UART_RX_TOUT_THRHD) << UART_RX_TOUT_THRHD_S |
         UART_RX_TOUT_EN|
         ((0x10 & UART_TXFIFO_EMPTY_THRHD)<<UART_TXFIFO_EMPTY_THRHD_S));//wjl 
         #if UART_HW_CTS
@@ -242,12 +243,14 @@ uart0_rx_intr_handler(void *para)
         DBG("f");
         uart_rx_intr_disable(UART0);
         WRITE_PERI_REG(UART_INT_CLR(UART0), UART_RXFIFO_FULL_INT_CLR);
-        system_os_post(uart_recvTaskPrio, 0, 0);
+        //system_os_post(uart_recvTaskPrio, 0, 0);
+        do_uart_recv();
     }else if(UART_RXFIFO_TOUT_INT_ST == (READ_PERI_REG(UART_INT_ST(uart_no)) & UART_RXFIFO_TOUT_INT_ST)){
         DBG("t");
         uart_rx_intr_disable(UART0);
         WRITE_PERI_REG(UART_INT_CLR(UART0), UART_RXFIFO_TOUT_INT_CLR);
-        system_os_post(uart_recvTaskPrio, 0, 0);
+        //system_os_post(uart_recvTaskPrio, 0, 0);
+        do_uart_recv();
     }else if(UART_TXFIFO_EMPTY_INT_ST == (READ_PERI_REG(UART_INT_ST(uart_no)) & UART_TXFIFO_EMPTY_INT_ST)){
         DBG("e");
 	/* to output uart data from uart buffer directly in empty interrupt handler*/
@@ -316,11 +319,26 @@ uart_recvTask(os_event_t *events)
     }
 }
 
+LOCAL void do_uart_recv(void)
+{
+    uint8 fifo_len = (READ_PERI_REG(UART_STATUS(UART0))>>UART_RXFIFO_CNT_S)&UART_RXFIFO_CNT;
+    uint8 d_tmp = 0;
+    uint8 idx=0;
+    for(idx=0;idx<fifo_len;idx++) {
+        d_tmp = READ_PERI_REG(UART_FIFO(UART0)) & 0xFF;
+        //uart_tx_one_char(UART0, d_tmp);
+        _uart0_one_byte_enqueue(d_tmp);
+    }
+    WRITE_PERI_REG(UART_INT_CLR(UART0), UART_RXFIFO_FULL_INT_CLR|UART_RXFIFO_TOUT_INT_CLR);
+    uart_rx_intr_enable(UART0);
+}
+
+
 void ICACHE_FLASH_ATTR
 uart_init(UartBautRate uart0_br, UartBautRate uart1_br)
 {
     /*this is a example to process uart data from task,please change the priority to fit your application task if exists*/
-    system_os_task(uart_recvTask, uart_recvTaskPrio, uart_recvTaskQueue, uart_recvTaskQueueLen);  //demo with a task to process the uart data
+    //system_os_task(uart_recvTask, uart_recvTaskPrio, uart_recvTaskQueue, uart_recvTaskQueueLen);  //demo with a task to process the uart data
     
     UartDev.baut_rate = uart0_br;
     uart_config(UART0);

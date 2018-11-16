@@ -14,7 +14,7 @@ static void ICACHE_FLASH_ATTR uart_recv_test(void *parm)
 {
     uint8_t buf[128];
     uint32_t len = 128;
-    uint32_t rbytes = honyar_uart_read(buf, len, 50);
+    uint32_t rbytes = honyar_uart_read(buf, len, 30);
     if(rbytes) {
         hy_info("uart read %d bytes\r\n", rbytes);
         honyar_uart_write("hello world\r\n", strlen("hello world\r\n"));
@@ -23,7 +23,7 @@ static void ICACHE_FLASH_ATTR uart_recv_test(void *parm)
 
 static void ICACHE_FLASH_ATTR uart_test(void)
 {
-    honyar_uart_init(115200);
+    honyar_uart_init(9600);
     honyar_add_task(uart_recv_test, NULL, 0);
 }
 
