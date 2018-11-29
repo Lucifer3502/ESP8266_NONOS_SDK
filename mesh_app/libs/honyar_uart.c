@@ -68,7 +68,7 @@ uint32_t ICACHE_FLASH_ATTR honyar_uart_write(const uint8_t *buf, uint32_t len)
 
 int32_t ICACHE_FLASH_ATTR honyar_uart_init(uint32_t baudrate)
 {
-    UART_SetBaudrate(UART0, baudrate);
-    //uart_init(baudrate, 115200);
+    //UART_SetBaudrate(UART0, baudrate);
+    uart_init(baudrate, BIT_RATE_115200);
     return 0;
 }

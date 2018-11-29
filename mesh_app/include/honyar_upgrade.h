@@ -32,5 +32,9 @@ typedef struct t_ota_bin_s
     uint32_t reserve[8];
 }T_OTA_BIN_S;
 
+int32_t try_upgrading_lock(void);
+
+int32_t upgrading_unlock(void);
+
 #endif
 

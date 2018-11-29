@@ -8,6 +8,7 @@ static uint32_t _g_update_cfg_total_len = 0;
 static char *_gp_update_cfg_patch = NULL;
 static uint32_t _g_update_need_len = 0;
 static uint32_t _g_update_start_recv_len = 0;
+static uint32_t g_upgrade_lock = 0;
 
 uint32_t get_max_image_size(void)
 {
@@ -325,4 +326,18 @@ int32_t ICACHE_FLASH_ATTR hy_update_download(uint8_t *buf, uint32_t buf_len, uin
     }
 }
 
+int32_t ICACHE_FLASH_ATTR try_upgrading_lock(void)
+{
+    if(g_upgrade_lock) {
+        return -1;
+    }
 
+    g_upgrade_lock = 1;
+    return 0;
+}
+
+int32_t ICACHE_FLASH_ATTR upgrading_unlock(void)
+{
+    g_upgrade_lock = 0;
+    return 0;
+}

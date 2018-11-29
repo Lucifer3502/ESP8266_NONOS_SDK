@@ -1,7 +1,7 @@
 #include "honyar_common.h"
 
-#define WIFI_SSID_DEF "TP-LINK_5A5D"
-#define WIFI_PWD_DEF "auds_tech@2018"
+#define WIFI_SSID_DEF "zhihe_test"
+#define WIFI_PWD_DEF "123456zhihe"
 
 static wifi_station_status_cb_t g_wifi_station_status_cb;
 

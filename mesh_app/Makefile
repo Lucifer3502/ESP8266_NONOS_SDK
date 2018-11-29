@@ -78,6 +78,7 @@ LINKFLAGS_eagle.app.v6 = \
 	-lmain	\
 	-lwps \
 	-lmesh \
+	-lmbedtls \
 	-lsmartconfig \
 	-ldriver \
 	$(DEP_LIBS_eagle.app.v6)					\
