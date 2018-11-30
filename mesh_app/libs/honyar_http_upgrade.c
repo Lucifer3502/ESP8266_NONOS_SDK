@@ -52,7 +52,7 @@ static void ICACHE_FLASH_ATTR http_upgrade_recon_cb(void *arg, sint8 err)
 {
 	struct espconn *espconn_ptr = (struct espconn *)arg;
 
-	hy_info("at demo espconn reconnect\r\n");
+	hy_info("http_upgrade espconn reconnect\r\n");
 	g_network_connected = 0;
     http_upgrade_reconnect();
 }

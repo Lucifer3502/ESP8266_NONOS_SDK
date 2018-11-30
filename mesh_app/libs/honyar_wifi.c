@@ -5,6 +5,16 @@
 
 static wifi_station_status_cb_t g_wifi_station_status_cb;
 
+int32_t honyar_wifi_get_addr(uint8_t *mac)
+{
+    if (wifi_get_macaddr(STATION_IF, mac)) {
+        return 0;
+    }
+
+    hy_error("wifi_get_macaddr failed\r\n");
+    return -1;
+}
+
 int32_t ICACHE_FLASH_ATTR honyar_wifi_station_regist_statuscb(wifi_station_status_cb_t cb)
 {
     g_wifi_station_status_cb = cb;

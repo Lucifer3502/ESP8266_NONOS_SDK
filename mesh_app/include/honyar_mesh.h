@@ -14,6 +14,12 @@ typedef struct honyar_mesh_info{
     uint16_t port;
 }honyar_mesh_info_t;
 
+typedef void (*honyar_mesh_recv_handle_t)(const void *mesh_header, uint8_t *pdata, uint16_t len);
+
+void honyar_mesh_recv(void *arg, char *data, unsigned short len);
+
 int32_t honyar_mesh_init(honyar_mesh_info_t *info);
+
+void honyar_mesh_regist_recv_cb(honyar_mesh_recv_handle_t cb);
 
 #endif
