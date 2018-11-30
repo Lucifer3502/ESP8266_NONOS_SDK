@@ -11,8 +11,11 @@ static const uint8_t MESH_GROUP_ID[6] = {0x18,0xfe,0x34,0x00,0x00,0x50};
 int32_t ICACHE_FLASH_ATTR honyar_mesh_init(honyar_mesh_info_t *info)
 {
     espconn_mesh_print_ver();
+
+    //wifi_set_opmode_current(STATIONAP_MODE);
     if(NULL == info) {
         hy_error("no mesh info\r\n");
+        return -1;
     }
     if (!espconn_mesh_encrypt_init(HY_MESH_AUTH, info->pwd, info->pwd_len)) {
         hy_error("set pw fail\r\n");
@@ -35,7 +38,7 @@ int32_t ICACHE_FLASH_ATTR honyar_mesh_init(honyar_mesh_info_t *info)
      */
     if (!espconn_mesh_group_id_init((uint8_t *)MESH_GROUP_ID, sizeof(MESH_GROUP_ID))) {
         hy_error("set grp id fail\n");
-        return false;
+        return -1;
     }
 
     /*
@@ -43,8 +46,9 @@ int32_t ICACHE_FLASH_ATTR honyar_mesh_init(honyar_mesh_info_t *info)
      */
     if (!espconn_mesh_server_init((struct ip_addr *)&info->server, info->port)) {
         hy_error("server_init fail\n");
-        return false;
+        return -1;
     }
-    
+
+    return 0;
 }
 

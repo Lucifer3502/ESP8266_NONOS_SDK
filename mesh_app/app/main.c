@@ -1,4 +1,6 @@
 #include "honyar_common.h"
+#include "mesh_app.h"
+
 
 static void ICACHE_FLASH_ATTR network_test(void)
 {
@@ -27,6 +29,7 @@ static void ICACHE_FLASH_ATTR uart_test(void)
     honyar_add_task(uart_recv_test, NULL, 0);
 }
 
+/*
 static void wifi_station_cb(uint8_t status)
 {
     if(status == STATION_GOT_IP){
@@ -35,7 +38,7 @@ static void wifi_station_cb(uint8_t status)
     } else {
         hy_info("wifi status: %d\r\n", status);
     }
-}
+}*/
 
 void ICACHE_FLASH_ATTR user_init(void)
 {    
@@ -43,7 +46,9 @@ void ICACHE_FLASH_ATTR user_init(void)
 
     uart_test();
 
-    honyar_wifi_init();
-    honyar_wifi_station_regist_statuscb(wifi_station_cb);
+    //honyar_wifi_init();
+    //honyar_wifi_station_regist_statuscb(wifi_station_cb);
+
+    mesh_app_init();
 }
 

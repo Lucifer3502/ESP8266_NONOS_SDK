@@ -9,6 +9,8 @@
 #include "driver/uart.h"
 #include "driver/gpio16.h"
 #include "gpio.h"
+#include "user_config.h"
+#include "ip_addr.h"
 
 #include "honyar_types.h"
 #include "honyar_platform.h"
@@ -23,5 +25,6 @@
 #include "honyar_utils.h"
 #include "honyar_wifi.h"
 #include "honyar_types.h"
+#include "honyar_mesh.h"
 
 #endif

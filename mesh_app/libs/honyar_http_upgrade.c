@@ -37,6 +37,7 @@ static void ICACHE_FLASH_ATTR http_upgrade_discon_cb(void *arg)
   struct espconn *espconn_ptr = (struct espconn *)arg;
 
   hy_info("http_upgrade espconn disconnected\r\n");
+  g_network_connected = 0;
   http_upgrade_reconnect();
 }
 
