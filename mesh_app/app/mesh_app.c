@@ -94,7 +94,7 @@ static void mesh_app_task(void *parm)
     honyar_del_task(mesh_app_task);
 }
 
-static void mesh_app_callback(void)
+static void mesh_app_callback(int8_t res)
 {
     uint8_t status = espconn_mesh_get_status();
     hy_info("mesh status: %d\r\n", status);
