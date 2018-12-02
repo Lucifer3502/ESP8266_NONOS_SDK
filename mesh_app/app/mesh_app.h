@@ -4,5 +4,6 @@
 
 #include "honyar_types.h"
 
+int32_t mesh_app_init(void);
 
 #endif

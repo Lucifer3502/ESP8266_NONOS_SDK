@@ -10,5 +10,7 @@ int32_t honyar_wifi_get_macaddr(uint8_t *mac);
 
 int32_t honyar_wifi_station_regist_statuscb(wifi_station_status_cb_t cb);
 
+int32_t honyar_wifi_station_start(uint8_t *ssid, uint8_t *passwd);
+
 int32_t honyar_wifi_init(void);
 #endif

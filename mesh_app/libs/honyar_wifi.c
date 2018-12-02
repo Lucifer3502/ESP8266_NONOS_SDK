@@ -5,7 +5,8 @@
 
 static wifi_station_status_cb_t g_wifi_station_status_cb;
 
-int32_t honyar_wifi_get_macaddr(uint8_t *mac)
+int32_t ICACHE_FLASH_ATTR
+honyar_wifi_get_macaddr(uint8_t *mac)
 {
     if (wifi_get_macaddr(STATION_IF, mac)) {
         return 0;
@@ -15,13 +16,15 @@ int32_t honyar_wifi_get_macaddr(uint8_t *mac)
     return -1;
 }
 
-int32_t ICACHE_FLASH_ATTR honyar_wifi_station_regist_statuscb(wifi_station_status_cb_t cb)
+int32_t ICACHE_FLASH_ATTR
+honyar_wifi_station_regist_statuscb(wifi_station_status_cb_t cb)
 {
     g_wifi_station_status_cb = cb;
     return 0;
 }
 
-static void ICACHE_FLASH_ATTR honyar_wifi_sta_workstation(void *parm)
+static void ICACHE_FLASH_ATTR
+honyar_wifi_sta_workstation(void *parm)
 {
     struct ip_info ip;
     uint8_t status;
@@ -39,7 +42,8 @@ static void ICACHE_FLASH_ATTR honyar_wifi_sta_workstation(void *parm)
     }
 }
 
-static int32_t ICACHE_FLASH_ATTR honyar_wifi_station_start(uint8_t *ssid, uint8_t *passwd)
+int32_t ICACHE_FLASH_ATTR
+honyar_wifi_station_start(uint8_t *ssid, uint8_t *passwd)
 {
     struct station_config sta_conf;
 	os_memset(&sta_conf, 0, sizeof(struct station_config));
@@ -49,12 +53,12 @@ static int32_t ICACHE_FLASH_ATTR honyar_wifi_station_start(uint8_t *ssid, uint8_
     wifi_set_opmode_current(STATION_MODE);
 	wifi_station_set_config_current(&sta_conf);
 	wifi_station_connect();
-
-    honyar_add_task(honyar_wifi_sta_workstation, NULL, 1000 / TASK_CYCLE_TM_MS);
 }
 
-int32_t ICACHE_FLASH_ATTR honyar_wifi_init(void)
+int32_t ICACHE_FLASH_ATTR
+honyar_wifi_init(void)
 {
-    honyar_wifi_station_start(WIFI_SSID_DEF, WIFI_PWD_DEF);
+    //honyar_wifi_station_start(WIFI_SSID_DEF, WIFI_PWD_DEF);
+    honyar_add_task(honyar_wifi_sta_workstation, NULL, 1000 / TASK_CYCLE_TM_MS);
 }
 

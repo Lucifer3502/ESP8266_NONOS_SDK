@@ -32,6 +32,7 @@ static void ICACHE_FLASH_ATTR mesh_send(uint8_t *data, uint16_t len)
     hy_info("mesh sending data ...\r\n");
     if (espconn_mesh_sent(&g_mesh_network, data, len)) {
         hy_error("mesh is busy\n");
+        espconn_mesh_disconnect(&g_mesh_network);
         return;
     }
 }
@@ -67,7 +68,7 @@ static void ICACHE_FLASH_ATTR mesh_recon_cb(void *arg, sint8 err)
 }
 
 
-static void mesh_client_init(void)
+static void ICACHE_FLASH_ATTR mesh_client_init(void)
 {
     uint32_t ip = ipaddr_addr(MESH_SERVER_IP_ADDR);
     memset(&g_mesh_network, 0, sizeof(g_mesh_network));
@@ -90,7 +91,7 @@ static void mesh_client_init(void)
     espconn_mesh_connect(&g_mesh_network);
 }
 
-static void mesh_app_task(void *parm)
+static void ICACHE_FLASH_ATTR mesh_app_task(void *parm)
 {
     uint8_t status = espconn_mesh_get_status();
     //fix me;
@@ -105,7 +106,7 @@ static void mesh_app_task(void *parm)
     honyar_del_task(mesh_app_task);
 }
 
-static void mesh_app_topo_task(void *parm)
+static void ICACHE_FLASH_ATTR mesh_app_topo_task(void *parm)
 {
     uint8_t status = espconn_mesh_get_status();
     if(MESH_LOCAL_AVAIL != status && MESH_ONLINE_AVAIL != status) {
@@ -114,7 +115,7 @@ static void mesh_app_topo_task(void *parm)
     mesh_topo_query(&g_mesh_network);
 }
 
-static void mesh_app_test(void *parm)
+static void ICACHE_FLASH_ATTR mesh_app_test(void *parm)
 {
 #if 0
     hy_info("mesh_app_test\r\n");
@@ -173,14 +174,14 @@ end:
 #endif
 }
 
-static void mesh_app_callback(int8_t res)
+static void ICACHE_FLASH_ATTR mesh_app_callback(int8_t res)
 {
     uint8_t status = espconn_mesh_get_status();
     hy_info("mesh status: %d\r\n", status);
 }
 
 
-int32_t mesh_app_init(void)
+int32_t ICACHE_FLASH_ATTR mesh_app_init(void)
 {
     struct station_config sta_conf;
     honyar_mesh_info_t info;
@@ -205,9 +206,9 @@ int32_t mesh_app_init(void)
     espconn_mesh_enable(mesh_app_callback, MESH_ONLINE);
     honyar_add_task(mesh_app_task, NULL, 1000 / TASK_CYCLE_TM_MS);
 
-    honyar_add_task(mesh_app_test, NULL, 5000 / TASK_CYCLE_TM_MS);
+    honyar_add_task(mesh_app_test, NULL, 20000 / TASK_CYCLE_TM_MS);
 
-    honyar_add_task(mesh_app_topo_task, NULL, 2000 / TASK_CYCLE_TM_MS);
+    honyar_add_task(mesh_app_topo_task, NULL, 5000 / TASK_CYCLE_TM_MS);
     
     return 0;
 }

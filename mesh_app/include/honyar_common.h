@@ -12,6 +12,7 @@
 #include "user_config.h"
 #include "ip_addr.h"
 #include "espconn.h"
+#include "upgrade.h"
 
 #include "honyar_types.h"
 #include "honyar_platform.h"

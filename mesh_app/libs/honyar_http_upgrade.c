@@ -2,17 +2,39 @@
 #include "honyar_common.h"
 
 #define HTTP_UPGRADE_TIMEOUT  20000
+#define HTTP_UPGRADE_BUF_SIZE 1024
 
 static esp_tcp g_http_iface;
 static struct espconn g_http_network;
 static uint32_t g_network_connected;
-
-
-static os_timer_t g_http_timer;
 static uint8_t g_http_reconnect_enable;
 
 
-static int32_t http_upgrade_reconnect(void)
+static os_timer_t g_http_timer;
+static http_upgrade_info_t g_http_upgrade_info;
+static uint8_t g_http_upgrade_start;
+
+static void http_upgrade_destroy(void *arg);
+
+static void ICACHE_FLASH_ATTR http_upgrade_send(uint8_t *data, uint32_t len)
+{
+    espconn_send(&g_http_network, data, len);
+}
+
+static void ICACHE_FLASH_ATTR http_upgrade_request(http_upgrade_info_t *info)
+{
+    uint8_t *buf = (uint8_t *)honyar_malloc(HTTP_UPGRADE_BUF_SIZE);
+    memset(buf, 0, HTTP_UPGRADE_BUF_SIZE);
+	os_sprintf(buf, "GET /%s HTTP/1.1\r\n"
+					"HOST:%s:%d\r\n"
+					"Connection: keep-alive\r\n\r\n",
+					info->file,
+					info->host,
+					info->port);
+    http_upgrade_send(buf, os_strlen((char *)buf));
+}
+
+static int32_t ICACHE_FLASH_ATTR http_upgrade_reconnect(void)
 {
     if(g_http_reconnect_enable) {
         espconn_connect(&g_http_network);
@@ -22,9 +44,27 @@ static int32_t http_upgrade_reconnect(void)
 // notify at module that espconn has received data
 static void ICACHE_FLASH_ATTR http_upgrade_recv(void *arg, char *data, unsigned short len)
 {
+    uint32_t offset = 0;
+    int32_t ret;
 	os_timer_disarm(&g_http_timer);
     os_timer_arm(&g_http_timer, HTTP_UPGRADE_TIMEOUT, false);
-    hex_printf((uint8_t *)"http recv:", (uint8_t *)data, (uint32_t)len);
+    //hex_printf((uint8_t *)"http recv:", (uint8_t *)data, (uint32_t)len);
+    if(0 == g_http_upgrade_start) {
+        if(parse_http_head(data, len, &offset)) {
+            http_upgrade_destroy(NULL);
+            return;
+        } else {
+            g_http_upgrade_start = 1;
+        }
+    }
+    ret = hy_update_download(data + offset, len - offset, NULL);
+    if(ret < 0) {
+        //err;
+        http_upgrade_destroy(NULL);
+    } else if(ret > 0){
+        http_upgrade_destroy(NULL);
+        wait_upgrade_reboot();
+    }
 }
 
 static void ICACHE_FLASH_ATTR http_upgrade_send_cb(void *arg)
@@ -46,6 +86,7 @@ static void ICACHE_FLASH_ATTR http_upgrade_connect_cb(void *arg)
 	hy_info("http_upgrade espconn connected\r\n");
 	espconn_set_opt((struct espconn*)arg, ESPCONN_COPY);
     g_network_connected = 1;
+    http_upgrade_request(&g_http_upgrade_info);
 }
 
 static void ICACHE_FLASH_ATTR http_upgrade_recon_cb(void *arg, sint8 err)
@@ -73,9 +114,10 @@ int32_t ICACHE_FLASH_ATTR http_upgrade_init(http_upgrade_info_t *info)
 {
     uint32 ip = 0;
     
-    if(try_upgrading_lock()) {
+    if(try_upgrading_lock() || NULL == info) {
         return -1;
     }
+    memcpy(&g_http_upgrade_info, info, sizeof(http_upgrade_info_t));
 
     ip = ipaddr_addr(info->host);
     memset(&g_http_network, 0, sizeof(g_http_network));
@@ -100,6 +142,7 @@ int32_t ICACHE_FLASH_ATTR http_upgrade_init(http_upgrade_info_t *info)
 
     g_network_connected = 0;
     g_http_reconnect_enable = 1;
+    g_http_upgrade_start = 0;
     espconn_connect(&g_http_network);
     
 }

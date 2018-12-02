@@ -36,5 +36,7 @@ int32_t try_upgrading_lock(void);
 
 int32_t upgrading_unlock(void);
 
+void wait_upgrade_reboot(void);
+
 #endif
 
