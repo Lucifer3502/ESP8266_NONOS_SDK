@@ -29,7 +29,7 @@ static void ICACHE_FLASH_ATTR http_upgrade_recv(void *arg, char *data, unsigned 
 
 static void ICACHE_FLASH_ATTR http_upgrade_send_cb(void *arg)
 {
-
+    
 }
 
 static void ICACHE_FLASH_ATTR http_upgrade_discon_cb(void *arg)

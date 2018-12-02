@@ -5,8 +5,14 @@ PROJECT_HOME=$(dirname $(pwd))
 export BIN_PATH=$PROJECT_HOME/bin
 export SDK_PATH=$PROJECT_HOME
 
-MODULE="DEMO"
+export APP_PATH=$(pwd)
+export TOOL_PATH=$PROJECT_HOME/tools/bin
+export CONF_PATH=$APP_PATH/config
+
+MODULE="XO1007"
+FROM_SW_VER=1.0.0
 SW_VER="1.0.0"
+HW_VER=$MODULE
 
 make clean
 ./gen_misc_user1.sh
@@ -31,7 +37,6 @@ fi
 
 #兼容的升级版本，从last_sw_version 到当前版本都可以使用此升级文件
 
-
 USER1_OFFSET=160
 USER2_OFFSET=409600
 USER1_BIN=user1.1024.new.2.bin
@@ -48,42 +53,38 @@ PATCH_NONE_FILE=PATCH_NULL.conf
 
 UTIME=`date +%s`
 TEMP_DIR=tmp
-#mkdir -p $TEMP_DIR
-#cp tools/* $TEMP_DIR/
-#cp config/* $TEMP_DIR/
-#cp $PROJECT_HOME/bin/upgrade/$USER1_BIN $TEMP_DIR/
-#cp $PROJECT_HOME/bin/upgrade/$USER2_BIN $TEMP_DIR/
-#
-#
-#cd tmp
-#
-#
-#./ota_linux_addhead $MODULE $HW_VER $SW_VER $UTIME $USER1_OFFSET $USER1_BIN $USER2_OFFSET $USER2_BIN $OTA_BIN $PATCH_CONFIG_FILE
-#iRet=$?
-#if [ $iRet != 0 ]
-#   then 
-#   echo "MERGE THE OTA BIN FAILED, ret = $iRet"
-#   rm -rf  $TEMP_DIR
-#   exit 1
-#fi
-#
-#./ota_linux_addhead $MODULE $HW_VER $SW_VER $UTIME $USER1_OFFSET $USER1_BIN $USER2_OFFSET $USER2_BIN $FAC_OTA_BIN $CONFIG_FILE
-#iRet=$?
-#if [ $iRet != 0 ]
-#   then 
-#   echo "MERGE THE FAC OTA BIN FAILED, ret = $iRet"
-#   rm -rf  $TEMP_DIR
-#   exit 1
-#fi
-#
-#
-#
-#cp $OTA_BIN $PROJECT_HOME/bin/upgrade/
-#cp $FAC_OTA_BIN $PROJECT_HOME/bin/upgrade/
+mkdir -p $TEMP_DIR
+
+cp $PROJECT_HOME/bin/upgrade/$USER1_BIN $TEMP_DIR/
+cp $PROJECT_HOME/bin/upgrade/$USER2_BIN $TEMP_DIR/
+cd tmp
+
+$TOOL_PATH/ota_linux_addhead $MODULE $HW_VER $SW_VER $UTIME $USER1_OFFSET $USER1_BIN $USER2_OFFSET $USER2_BIN $OTA_BIN $CONF_PATH/$PATCH_CONFIG_FILE
+iRet=$?
+if [ $iRet != 0 ]
+   then 
+   echo "MERGE THE OTA BIN FAILED, ret = $iRet"
+   rm -rf  $TEMP_DIR
+   exit 1
+fi
+
+$TOOL_PATH/ota_linux_addhead $MODULE $HW_VER $SW_VER $UTIME $USER1_OFFSET $USER1_BIN $USER2_OFFSET $USER2_BIN $FAC_OTA_BIN $CONF_PATH/$CONFIG_FILE
+iRet=$?
+if [ $iRet != 0 ]
+   then 
+   echo "MERGE THE FAC OTA BIN FAILED, ret = $iRet"
+   rm -rf  $TEMP_DIR
+   exit 1
+fi
+
+
+
+cp $OTA_BIN $PROJECT_HOME/bin/upgrade/
+cp $FAC_OTA_BIN $PROJECT_HOME/bin/upgrade/
 mv $PROJECT_HOME/bin/upgrade/$USER1_BIN $PROJECT_HOME/bin/upgrade/$USER1_NEW
 mv $PROJECT_HOME/bin/upgrade/$USER2_BIN $PROJECT_HOME/bin/upgrade/$USER2_NEW
-#cd ..
-#rm -rf $TEMP_DIR
+cd $APP_PATH
+rm -rf $TEMP_DIR
 
 
 OUT_FILE=upgrade/$RAW_FILE
@@ -120,8 +121,8 @@ dd if=$DEFAULT_PARM_BIN_NAME bs=$BLOCK_SIZE count=1 skip=0 seek=$DEFAULT_PARM_BI
 
 
 #CONFIG ADDR 0x7C000=507904
-#CONFIG_ADDR=507904
-#../app/tools/init_config ../app/config/$CONFIG_FILE $OUT_FILE $CONFIG_ADDR
+CONFIG_ADDR=507904
+$TOOL_PATH/init_config $CONF_PATH/$CONFIG_FILE $OUT_FILE $CONFIG_ADDR
 
 
 
