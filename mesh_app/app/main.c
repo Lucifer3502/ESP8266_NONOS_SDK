@@ -13,7 +13,7 @@ static void ICACHE_FLASH_ATTR http_upgrade_try(void)
     if(flag) {
         return;
     }
-    
+    flag = 1;
     memset(&info, 0, sizeof(info));
     memcpy(info.host, "192.168.0.3", NET_IP_ADDR_LEN);
     info.port = 80;
