@@ -105,6 +105,14 @@ static void mesh_app_task(void *parm)
     honyar_del_task(mesh_app_task);
 }
 
+static void mesh_app_topo_task(void *parm)
+{
+    uint8_t status = espconn_mesh_get_status();
+    if(MESH_LOCAL_AVAIL != status && MESH_ONLINE_AVAIL != status) {
+        return;
+    }
+    mesh_topo_query(&g_mesh_network);
+}
 
 static void mesh_app_test(void *parm)
 {
@@ -127,7 +135,7 @@ static void mesh_app_test(void *parm)
     if(!g_mesh_network_connected) {
         return;
     }
-    if (honyar_wifi_get_addr(src)) {
+    if (honyar_wifi_get_macaddr(src)) {
         return;
     }
 
@@ -198,6 +206,9 @@ int32_t mesh_app_init(void)
     honyar_add_task(mesh_app_task, NULL, 1000 / TASK_CYCLE_TM_MS);
 
     honyar_add_task(mesh_app_test, NULL, 5000 / TASK_CYCLE_TM_MS);
+
+    honyar_add_task(mesh_app_topo_task, NULL, 2000 / TASK_CYCLE_TM_MS);
+    
     return 0;
 }
 

@@ -5,7 +5,7 @@
 
 static wifi_station_status_cb_t g_wifi_station_status_cb;
 
-int32_t honyar_wifi_get_addr(uint8_t *mac)
+int32_t honyar_wifi_get_macaddr(uint8_t *mac)
 {
     if (wifi_get_macaddr(STATION_IF, mac)) {
         return 0;
