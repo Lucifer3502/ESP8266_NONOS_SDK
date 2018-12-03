@@ -15,9 +15,9 @@ struct mesh_device_list_type {
     struct mesh_device_mac_type *list;
 };
 
-void mesh_device_list_init();
+void mesh_device_list_init(void);
 
-void mesh_device_disp_mac_list();
+void mesh_device_disp_mac_list(void);
 
 void mesh_device_set_root(struct mesh_device_mac_type *root);
 
@@ -32,6 +32,5 @@ int32_t mesh_device_get_root(const struct mesh_device_mac_type **root);
 int32_t mesh_device_get_mac_list(const struct mesh_device_mac_type **list, uint16_t *count);
 
 
-
-
 #endif
+

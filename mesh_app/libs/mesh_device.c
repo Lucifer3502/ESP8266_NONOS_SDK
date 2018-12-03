@@ -7,7 +7,7 @@ static uint8_t g_mesh_device_init = 0;
 static struct mesh_device_list_type g_node_list;
 
 void ICACHE_FLASH_ATTR
-mesh_device_disp_mac_list()
+mesh_device_disp_mac_list(void)
 {
     uint16_t idx = 0;
 

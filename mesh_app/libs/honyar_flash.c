@@ -1,7 +1,7 @@
 #include "honyar_common.h"
 
 
-void ICACHE_FLASH_ATTR honyar_flash_erase(uint32_t addr,uint32_t len)
+void ICACHE_FLASH_ATTR honyar_flash_erase(uint32_t addr, uint32_t len)
 {
     if(!len) {
         return;
@@ -22,7 +22,7 @@ void ICACHE_FLASH_ATTR honyar_flash_erase(uint32_t addr,uint32_t len)
     hy_debug("erase done.\r\n");
 }
 
-void ICACHE_FLASH_ATTR honyar_flash_write(uint32_t addr, uint8_t *buf,uint32_t len)
+void ICACHE_FLASH_ATTR honyar_flash_write(uint32_t addr, uint8_t *buf, uint32_t len)
 {
     uint32_t real_addr = addr;
     uint32_t real_len = len;

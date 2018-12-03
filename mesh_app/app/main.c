@@ -7,7 +7,7 @@
 
 static void ICACHE_FLASH_ATTR http_upgrade_try(void)
 {
-    static uint8_t flag = 0;
+    static uint8_t flag = 1;
     http_upgrade_info_t info;
     
     if(flag) {
