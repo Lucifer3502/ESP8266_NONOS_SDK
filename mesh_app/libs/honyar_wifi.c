@@ -8,7 +8,13 @@ static wifi_station_status_cb_t g_wifi_station_status_cb;
 
 static uint8_t g_wifi_work_status = WIFI_MESH_STATUS;
 static uint8_t g_wifi_router_ssid[WIFI_SSID_LEN + 4] = WIFI_SSID_DEF;
-static uint8_t g_wifi_router_passwd[wifi_PASSWD_LEN + 4] = WIFI_PWD_DEF;
+static uint8_t g_wifi_router_passwd[WIFI_PASSWD_LEN + 4] = WIFI_PWD_DEF;
+
+static uint8_t g_wifi_scan_over_flag;
+static wifi_scan_result_info_t *g_wifi_scan_info = NULL;
+static uint32_t g_wifi_ap_cnt = 0;
+
+
 
 int32_t ICACHE_FLASH_ATTR
 honyar_wifi_get_macaddr(uint8_t *mac)
@@ -61,20 +67,45 @@ honyar_wifi_station_start(uint8_t *ssid, uint8_t *passwd)
 }
 
 uint8_t ICACHE_FLASH_ATTR 
-honyar_wifi_work_status(void)
+honyar_wifi_get_work_status(void)
 {
     return ((g_wifi_work_status >= WIFI_INVALID_STATUS)
             ? WIFI_INVALID_STATUS : g_wifi_work_status);
 }
 
-uint8_t ICACHE_FLASH_ATTR *honyar_wifi_router_ssid(void)
+int32_t ICACHE_FLASH_ATTR 
+honyar_wifi_set_work_status(uint8_t status)
+{
+    g_wifi_work_status =  ((status >= WIFI_INVALID_STATUS)
+            ? WIFI_MESH_STATUS : status);
+
+    return 0;
+}
+
+uint8_t ICACHE_FLASH_ATTR
+*honyar_wifi_get_router_ssid(void)
 {
     return g_wifi_router_ssid;
 }
 
-uint8_t ICACHE_FLASH_ATTR *honyar_wifi_router_passwd(void)
+uint8_t ICACHE_FLASH_ATTR
+*honyar_wifi_get_router_passwd(void)
 {
     return g_wifi_router_passwd;
+}
+
+int32_t ICACHE_FLASH_ATTR
+honyar_wifi_set_router_ssid(uint8_t *ssid)
+{
+    os_strncpy(g_wifi_router_ssid, ssid, WIFI_SSID_LEN);
+    return 0;
+}
+
+int32_t ICACHE_FLASH_ATTR
+honyar_wifi_set_router_passwd(uint8_t *passwd)
+{
+    os_strncpy(g_wifi_router_passwd, passwd, WIFI_PASSWD_LEN);
+    return 0;
 }
 
 
@@ -99,5 +130,134 @@ honyar_wifi_init(void)
 {
     //honyar_wifi_station_start(WIFI_SSID_DEF, WIFI_PWD_DEF);
     honyar_add_task(honyar_wifi_sta_workstation, NULL, 1000 / TASK_CYCLE_TM_MS);
+}
+
+
+static void ICACHE_FLASH_ATTR 
+honyar_wifi_station_scan_cb(void *arg, STATUS status)
+{
+    uint8_t ssid[WIFI_SSID_LEN + 4] = {0};
+    uint8_t ap_num = 0;
+    int8_t rssi_high = -40;
+    int8_t rssi_low = -50;
+    int8_t rssi_min = -100;
+    
+    if(OK != status) {
+        hy_error("station scan done failed. status: %d\r\n", status);
+        return;
+    }
+
+    struct bss_info *bss_link = (struct bss_info *)arg;
+    if(!g_wifi_scan_info) {
+        return;
+    }
+    
+    while(bss_link) {
+        if(bss_link->rssi >= rssi_high) {
+            memcpy(g_wifi_scan_info[ap_num].ssid, bss_link->ssid, WIFI_SSID_LEN);
+            g_wifi_scan_info[ap_num].ssid_len = strlen(g_wifi_scan_info[ap_num].ssid);
+            g_wifi_scan_info[ap_num].channel = bss_link->channel;
+            memcpy(g_wifi_scan_info[ap_num].mac, bss_link->bssid, 6);
+            g_wifi_scan_info[ap_num].signal = bss_link->rssi;
+            g_wifi_scan_info[ap_num].sec = bss_link->authmode;
+            ap_num++;
+        }
+        
+        bss_link = bss_link->next.stqe_next;
+        if(ap_num >= WIFI_SCAN_AP_MAX_NUM) {
+            break;
+        }
+    }
+
+    bss_link = (struct bss_info *)arg;
+    while(bss_link) {
+        if(ap_num >= WIFI_SCAN_AP_MAX_NUM) {
+            break;
+        }
+        if(bss_link->rssi < rssi_high && bss_link->rssi >= rssi_low) {
+            memcpy(g_wifi_scan_info[ap_num].ssid, bss_link->ssid, WIFI_SSID_LEN);
+            g_wifi_scan_info[ap_num].ssid_len = strlen(g_wifi_scan_info[ap_num].ssid);
+            g_wifi_scan_info[ap_num].channel = bss_link->channel;
+            memcpy(g_wifi_scan_info[ap_num].mac, bss_link->bssid, 6);
+            g_wifi_scan_info[ap_num].signal = bss_link->rssi;
+            g_wifi_scan_info[ap_num].sec = bss_link->authmode;
+            ap_num++;
+        }
+        bss_link = bss_link->next.stqe_next;
+        if(NULL == bss_link) {
+            bss_link = (struct bss_info *)arg;
+            rssi_high -= 10;
+            rssi_low -= 10;
+            if(rssi_high < rssi_min) {
+                //ignore, the signal is too weak
+                break;
+            }
+        }
+    }
+    g_wifi_ap_cnt = ap_num;
+
+    //debug print
+    bss_link = (struct bss_info *)arg;
+    while(bss_link) {
+        memcpy(ssid, bss_link->ssid, WIFI_SSID_LEN);
+        hy_printf("(sec:%d, ssid:\"%s\", rssi:%d, mac:\""MACSTR"\", channel:%d, freq_offset:%d, freqcal_val:%d)\r\n",
+                 bss_link->authmode, ssid, bss_link->rssi,
+                 MAC2STR(bss_link->bssid),bss_link->channel, 
+                 bss_link->freq_offset, bss_link->freqcal_val);
+        
+        bss_link = bss_link->next.stqe_next;
+    }
+    
+    hy_info("station scan ok.\r\n");
+    g_wifi_scan_over_flag = 1;
+}
+
+
+int32_t ICACHE_FLASH_ATTR
+dl_wifi_scan(uint32_t timeout)
+{
+    uint32_t sleep_time = 0;
+    
+    if (g_wifi_scan_info == NULL) {
+        g_wifi_scan_info = honyar_malloc(sizeof(wifi_scan_result_info_t) * WIFI_SCAN_AP_MAX_NUM);
+        memset(g_wifi_scan_info, 0, sizeof(wifi_scan_result_info_t) * WIFI_SCAN_AP_MAX_NUM);
+    }
+    g_wifi_ap_cnt = 0;
+    g_wifi_scan_over_flag = 0;
+    
+    wifi_set_opmode_current(STATION_MODE);
+    if(wifi_get_opmode() == SOFTAP_MODE) {
+        hy_error("ap mode can't scan !!!\r\n");
+        return -1;
+    }
+
+    if(!wifi_station_scan(NULL, honyar_wifi_station_scan_cb)) {
+        hy_error("station scan failed.\r\n");
+        return -1;
+    }
+    
+    while(!g_wifi_scan_over_flag) {
+        if(sleep_time > timeout) {
+            hy_info("station scan timeout");
+            break;
+        }
+        sleep_time += 100;
+        honyar_msleep(100);
+    }
+    
+    hy_info("station scan over. HEAP FREE MEM: %u.\r\n", system_get_free_heap_size());
+    return 0;
+}
+
+
+int32_t ICACHE_FLASH_ATTR
+dl_wifi_get_list( wifi_scan_result_info_t **list, uint32_t *num)
+{
+    if(g_wifi_scan_info) {
+        *num = g_wifi_ap_cnt;
+        *list = g_wifi_scan_info;
+        return 0;
+    }
+    return -1;
 }
 

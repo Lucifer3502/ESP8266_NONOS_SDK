@@ -30,5 +30,6 @@
 #include "honyar_types.h"
 #include "honyar_mesh.h"
 #include "mesh_device.h"
+#include "honyar_device.h"
 
 #endif
