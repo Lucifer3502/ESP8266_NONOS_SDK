@@ -3,7 +3,12 @@
 #define WIFI_SSID_DEF "zhihe_test"
 #define WIFI_PWD_DEF "123456zhihe"
 
+
 static wifi_station_status_cb_t g_wifi_station_status_cb;
+
+static uint8_t g_wifi_work_status = WIFI_MESH_STATUS;
+static uint8_t g_wifi_router_ssid[WIFI_SSID_LEN + 4] = WIFI_SSID_DEF;
+static uint8_t g_wifi_router_passwd[wifi_PASSWD_LEN + 4] = WIFI_PWD_DEF;
 
 int32_t ICACHE_FLASH_ATTR
 honyar_wifi_get_macaddr(uint8_t *mac)
@@ -53,6 +58,40 @@ honyar_wifi_station_start(uint8_t *ssid, uint8_t *passwd)
     wifi_set_opmode_current(STATION_MODE);
 	wifi_station_set_config_current(&sta_conf);
 	wifi_station_connect();
+}
+
+uint8_t ICACHE_FLASH_ATTR 
+honyar_wifi_work_status(void)
+{
+    return ((g_wifi_work_status >= WIFI_INVALID_STATUS)
+            ? WIFI_INVALID_STATUS : g_wifi_work_status);
+}
+
+uint8_t ICACHE_FLASH_ATTR *honyar_wifi_router_ssid(void)
+{
+    return g_wifi_router_ssid;
+}
+
+uint8_t ICACHE_FLASH_ATTR *honyar_wifi_router_passwd(void)
+{
+    return g_wifi_router_passwd;
+}
+
+
+void ICACHE_FLASH_ATTR
+honyar_wifi_config_regist(void)
+{
+    DL_CONFIG_ITEM_S config_items[] = 
+	{
+        {"CFG_WIFI_WORK_STATUS", DL_CFG_ITEM_TYPE_DEC8, &g_wifi_work_status, sizeof(g_wifi_work_status), 0},
+        {"CFG_WIFI_ROUTER_SSID", DL_CFG_ITEM_TYPE_STRING, g_wifi_router_ssid, sizeof(g_wifi_router_ssid), 0},
+        {"CFG_WIFI_ROUTER_PASSWD", DL_CFG_ITEM_TYPE_STRING, g_wifi_router_passwd, sizeof(g_wifi_router_passwd), 0},
+	};
+
+	uint32_t i;
+	for (i = 0; i < sizeof(config_items)/sizeof(config_items[0]); i++) {
+        dl_config_items_register_by_user(&config_items[i]);
+    }
 }
 
 int32_t ICACHE_FLASH_ATTR

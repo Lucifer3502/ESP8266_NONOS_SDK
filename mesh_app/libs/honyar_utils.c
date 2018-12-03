@@ -74,7 +74,7 @@ int hy_hex2byte(unsigned char *dest, int dest_len, unsigned char *src, int src_l
     return 0;
 }
 
-int32_t hy_byte2hex(unsigned char *dest, int dest_len, unsigned char *src, int src_len)
+int32_t hy_byte2hex(unsigned char *dest, unsigned int dest_len, unsigned char *src, unsigned int src_len)
 {
     uint32_t i;
     if(dest_len < src_len * 2 || !dest || !src) {

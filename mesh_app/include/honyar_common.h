@@ -16,6 +16,7 @@
 
 #include "honyar_types.h"
 #include "honyar_platform.h"
+#include "honyar_config.h"
 #include "honyar_flash.h"
 #include "honyar_gpio.h"
 #include "honyar_ilink.h"

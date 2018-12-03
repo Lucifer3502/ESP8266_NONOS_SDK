@@ -15,6 +15,8 @@ static struct honyar_task g_honyar_tasks[TASK_MAX_NUM];
 static os_timer_t g_honyar_platform_timer;
 static uint8_t g_reboot;
 
+void honyar_wifi_config_regist(void);
+
 void ICACHE_FLASH_ATTR honyar_usleep(uint32_t us)
 {
     os_delay_us(us);
@@ -169,9 +171,15 @@ static void ICACHE_FLASH_ATTR _honyar_platform_init(void)
     honyar_add_task(honyar_platform_task, NULL, 10000 / TASK_CYCLE_TM_MS);
 }
 
+static void honyar_config_regist(void)
+{
+    honyar_wifi_config_regist();
+}
+
 void ICACHE_FLASH_ATTR honyar_platform_init(void)
 {
     _honyar_platform_init();
+    honyar_config_regist();
     
     os_timer_disarm(&g_honyar_platform_timer);
     os_timer_setfn(&g_honyar_platform_timer, (os_timer_func_t *)honyar_task, NULL);

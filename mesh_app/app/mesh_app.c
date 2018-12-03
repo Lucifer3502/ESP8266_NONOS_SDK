@@ -4,9 +4,6 @@
 #define MESH_SSID_PREFIX "ZHIHE_"
 #define MESH_AP_PWD     "zWG9kvcCFS"
 
-#define MESH_ROUTER_SSID "zhihe_test"
-#define MESH_ROUTER_PASS "123456zhihe"
-
 
 #define MESH_SERVER_IP_ADDR  "192.168.0.3"
 #define MESH_SERVER_PORT     8088
@@ -187,8 +184,8 @@ int32_t ICACHE_FLASH_ATTR mesh_app_init(void)
     honyar_mesh_info_t info;
 
     os_memset(&sta_conf, 0, sizeof(struct station_config));
-	os_sprintf(sta_conf.ssid, "%s", MESH_ROUTER_SSID);
-	os_sprintf(sta_conf.password, "%s", MESH_ROUTER_PASS);
+	os_sprintf(sta_conf.ssid, "%s", honyar_wifi_router_ssid());
+	os_sprintf(sta_conf.password, "%s", honyar_wifi_router_passwd());
     
     memset(&info, 0, sizeof(info));
     info.ssid_prefix = MESH_SSID_PREFIX;

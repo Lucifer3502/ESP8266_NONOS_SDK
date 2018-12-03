@@ -9,7 +9,7 @@ void hex_printf(uint8_t *head, uint8_t *buf, uint32_t len);
 
 int hy_hex2byte(unsigned char *dest, int dest_len, unsigned char *src, int src_len);
 
-int32_t hy_byte2hex(unsigned char *dest, int dest_len, unsigned char *src, int src_len);
+int32_t hy_byte2hex(unsigned char *dest, unsigned int dest_len, unsigned char *src, unsigned int src_len);
 
 void honyar_memmove(void *dest, void *src, unsigned int len);
 
