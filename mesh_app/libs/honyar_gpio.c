@@ -49,7 +49,7 @@ honyar_gpio_init(void)
 static uint8_t ICACHE_FLASH_ATTR
 honyarl_gpio_find(uint8_t pin_num)
 {
-	if(pin_num >= 1 && pin_num <=  LOGICAL_PIN_MAX_NUM) {
+    if(pin_num >= 1 && pin_num <=  LOGICAL_PIN_MAX_NUM) {
         return g_pin_gpio[pin_num];
     } else {
         return PIN_IO_NONE;
@@ -67,9 +67,9 @@ honyarl_gpio_find(uint8_t pin_num)
 int32_t ICACHE_FLASH_ATTR
 honyar_gpio_config(uint8_t pin, uint8_t dir, uint8_t pull)
 {
-	uint8_t key = honyarl_gpio_find(pin);
+    uint8_t key = honyarl_gpio_find(pin);
 
-	if (PIN_IO_NONE == key) {
+    if (PIN_IO_NONE == key) {
         return -1;
     }
     
@@ -82,8 +82,8 @@ honyar_gpio_config(uint8_t pin, uint8_t dir, uint8_t pull)
         }
     }
     
-	if(GPIO_INTPUT == dir) {
-		if(PIN_GPIO_16 == key) {
+    if(GPIO_INTPUT == dir) {
+        if(PIN_GPIO_16 == key) {
             gpio16_input_conf();
         } else {
             uint32_t io_reg = GPIO_PIN_REG(key);
@@ -94,8 +94,8 @@ honyar_gpio_config(uint8_t pin, uint8_t dir, uint8_t pull)
                 PIN_PULLUP_DIS(io_reg);
             }
         }
-	} else if(GPIO_OUTPUT == dir) {
-		if(PIN_GPIO_16 == key) {
+    } else if(GPIO_OUTPUT == dir) {
+        if(PIN_GPIO_16 == key) {
             gpio16_output_conf();
         } else {
             uint32_t io_reg = GPIO_PIN_REG(key);
@@ -106,11 +106,11 @@ honyar_gpio_config(uint8_t pin, uint8_t dir, uint8_t pull)
                 PIN_PULLUP_DIS(io_reg);
             }
         }
-	} else {
+    } else {
         return -1;
     }
 
-	return 0;
+    return 0;
 }
 
 /**********************************************************/
@@ -124,21 +124,18 @@ honyar_gpio_config(uint8_t pin, uint8_t dir, uint8_t pull)
 int32_t ICACHE_FLASH_ATTR
 honyar_gpio_set_output(uint8_t pin, uint8_t state)
 {
-	uint8_t key = honyarl_gpio_find(pin);
+    uint8_t key = honyarl_gpio_find(pin);
 
-	if (PIN_IO_NONE == key || GPIO_UNKNOWN == state) {   
+    if (PIN_IO_NONE == key || GPIO_UNKNOWN == state) {   
         return -1;
     }
     
-	if (PIN_GPIO_16 == key)
-	{
-		gpio16_output_set(state);
-	}
-	else
-	{
-		GPIO_OUTPUT_SET(key, state);
-	}
-	return 0;
+    if (PIN_GPIO_16 == key){
+        gpio16_output_set(state);
+    } else {
+        GPIO_OUTPUT_SET(key, state);
+    }
+    return 0;
 }
 
 /**********************************************************/
@@ -152,18 +149,17 @@ honyar_gpio_set_output(uint8_t pin, uint8_t state)
 uint8_t ICACHE_FLASH_ATTR
 honyar_gpio_get_input(uint8_t pin)
 {
-	uint8_t key = honyarl_gpio_find(pin);
+    uint8_t key = honyarl_gpio_find(pin);
 
-	if (PIN_IO_NONE == key)
-	{
-		return GPIO_UNKNOWN;
-	}
-	if(PIN_GPIO_16 == key)
-    {
+    if (PIN_IO_NONE == key) {
+        return GPIO_UNKNOWN;
+    }
+
+    if(PIN_GPIO_16 == key) {
         return gpio16_input_get();
     }
     
-	return GPIO_INPUT_GET(key);
+    return GPIO_INPUT_GET(key);
 }
 
 
