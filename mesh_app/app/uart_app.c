@@ -16,6 +16,7 @@ static void ICACHE_FLASH_ATTR uart_recv_task(void *parm)
 int32_t ICACHE_FLASH_ATTR uart_app_init(void)
 {
     honyar_uart_init(BIT_RATE_9600);
+    UART_SetParity(UART0, EVEN_BITS);
     honyar_add_task(uart_recv_task, NULL, 0);
 }
 

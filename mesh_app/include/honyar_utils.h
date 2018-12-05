@@ -15,5 +15,9 @@ void honyar_memmove(void *dest, void *src, unsigned int len);
 
 uint16_t modbus_crc16 (uint8_t *data, uint8_t len);
 
+uint8_t bcd_to_hex(uint8_t data);
+
+//make sure the data less than 100;
+uint8_t hex_to_bcd(uint8_t data);
 
 #endif

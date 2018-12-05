@@ -4,7 +4,8 @@
 
 #define HTTP_TAIL_TAG  "\r\n\r\n"
 
-int32_t parse_http_head(uint8_t *buf, uint32_t len, uint32_t *offset)
+int32_t ICACHE_FLASH_ATTR
+parse_http_head(uint8_t *buf, uint32_t len, uint32_t *offset)
 {
     uint32_t tail_size = strlen(HTTP_TAIL_TAG);
     uint32_t tag = 0;
@@ -25,7 +26,8 @@ int32_t parse_http_head(uint8_t *buf, uint32_t len, uint32_t *offset)
     return -1;
 }
 
-void hex_printf(uint8_t *head, uint8_t *buf, uint32_t len)
+void ICACHE_FLASH_ATTR
+hex_printf(uint8_t *head, uint8_t *buf, uint32_t len)
 {
     uint32_t i = 0;
     
@@ -42,7 +44,8 @@ void hex_printf(uint8_t *head, uint8_t *buf, uint32_t len)
     hy_printf("\r\n");
 }
 
-int hy_hex2byte(unsigned char *dest, int dest_len, unsigned char *src, int src_len)
+int ICACHE_FLASH_ATTR
+hy_hex2byte(unsigned char *dest, int dest_len, unsigned char *src, int src_len)
 {
     if((src_len % 2) || (dest_len < src_len / 2))
         return -1;
@@ -74,7 +77,8 @@ int hy_hex2byte(unsigned char *dest, int dest_len, unsigned char *src, int src_l
     return 0;
 }
 
-int32_t hy_byte2hex(unsigned char *dest, unsigned int dest_len, unsigned char *src, unsigned int src_len)
+int32_t ICACHE_FLASH_ATTR
+hy_byte2hex(unsigned char *dest, unsigned int dest_len, unsigned char *src, unsigned int src_len)
 {
     uint32_t i;
     if(dest_len < src_len * 2 || !dest || !src) {
@@ -88,7 +92,8 @@ int32_t hy_byte2hex(unsigned char *dest, unsigned int dest_len, unsigned char *s
     return 0;
 }
 
-void honyar_memmove(void *dest, void *src, unsigned int len)
+void ICACHE_FLASH_ATTR
+honyar_memmove(void *dest, void *src, unsigned int len)
 {
     uint32_t i = 0;
     uint8_t *d = dest;
@@ -98,7 +103,8 @@ void honyar_memmove(void *dest, void *src, unsigned int len)
     }
 }
 
-uint16_t modbus_crc16 (uint8_t *data, uint8_t len)
+uint16_t ICACHE_FLASH_ATTR
+modbus_crc16 (uint8_t *data, uint8_t len)
 {
     uint16_t crc = 0xFFFF;
     uint32_t i = 0;
@@ -118,4 +124,18 @@ uint16_t modbus_crc16 (uint8_t *data, uint8_t len)
 
     return crc;
 }
+
+uint8_t ICACHE_FLASH_ATTR
+bcd_to_hex(uint8_t data)
+{
+    return ((data >> 4) * 10  + (data & 0x0f));
+}
+
+uint8_t ICACHE_FLASH_ATTR
+hex_to_bcd(uint8_t data)
+{
+    return (((data / 10) << 4) + (data % 10));
+}
+
+
 

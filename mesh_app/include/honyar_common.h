@@ -14,6 +14,7 @@
 #include "espconn.h"
 #include "upgrade.h"
 
+#include "cJSON.h"
 #include "honyar_types.h"
 #include "honyar_platform.h"
 #include "honyar_config.h"
