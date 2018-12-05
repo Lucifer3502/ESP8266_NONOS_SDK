@@ -98,4 +98,24 @@ void honyar_memmove(void *dest, void *src, unsigned int len)
     }
 }
 
+uint16_t modbus_crc16 (uint8_t *data, uint8_t len)
+{
+    uint16_t crc = 0xFFFF;
+    uint32_t i = 0;
+    uint32_t j = 0;
+
+    for ( i = 0; i < len; i++) {
+        crc = crc ^ data[i];
+        for (j = 0; j < 8; j++) {
+           if(crc & 0x0001) {
+               crc = crc >> 1;
+               crc = crc ^ 0xa001;
+          } else {
+                crc = crc >> 1;
+          }
+        }
+    }
+
+    return crc;
+}
 

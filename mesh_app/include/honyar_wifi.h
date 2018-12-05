@@ -49,8 +49,10 @@ int32_t honyar_wifi_set_router_passwd(uint8_t *passwd);
 
 int32_t honyar_wifi_init(void);
 
-int32_t dl_wifi_scan(uint32_t timeout);
+uint32_t honyar_wifi_scan_isover(void);
 
-int32_t dl_wifi_get_list( wifi_scan_result_info_t **list, uint32_t *num);
+int32_t honyar_wifi_scan(void);
+
+int32_t honyar_wifi_get_list( wifi_scan_result_info_t **list, uint32_t *num);
 
 #endif

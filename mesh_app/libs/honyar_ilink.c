@@ -1,7 +1,7 @@
 
 #include "honyar_common.h"
 
-
+#define WIFI_SCAN_TIMEOUT  10000
 #define iLinkConnectVer     "V1.1.0"
             //0、待确认区
             //使用无加密在公司的路由器下怎么无法使用一键设置；
@@ -144,7 +144,7 @@ LOCAL void ilink_relock_channel(uint8_t *bssid)
 	wifi_scan_result_info_t *plist;
     uint32_t i;
     
-    if(dl_wifi_get_list(&plist, &num)) {
+    if(honyar_wifi_get_list(&plist, &num)) {
         return;
     }
 
@@ -905,7 +905,7 @@ int32_t ilink_read(I_LINK_CONNECT_WIFI_FRAME_HEAD_SHORT_STR *pbuf)
     return 0;
 }
 
-LOCAL void dl_ilink_task(void *ppara)
+LOCAL void honyar_ilink_task(void *ppara)
 {
     //2.监听数据处理
     {
@@ -1003,18 +1003,27 @@ LOCAL void dl_ilink_task(void *ppara)
                 dl_config_commit_later();
                 dl_config_commit(0);
                 honyar_sys_reboot(0);
+                honyar_del_task(honyar_ilink_task);
                 return;
             }
         }
     }
 }
 
-void ICACHE_FLASH_ATTR honyar_ilink_init(void)
+static void ICACHE_FLASH_ATTR 
+_honyar_ilink_init(void *parm)
 {
-    if (_g_pilink_recv_buf) {
+    if(!honyar_wifi_scan_isover()) {
         return;
     }
+    honyar_del_task(_honyar_ilink_init);
+    if (_g_pilink_recv_buf) {
+        honyar_free(_g_pilink_recv_buf);
+        _g_pilink_recv_buf = NULL;
+    }
+    
     hy_printf("Lib ilink "iLinkConnectVer"\r\n");
+
     _g_pilink_recv_buf = (I_LINK_CONNECT_WIFI_FRAME_HEAD_SHORT_STR *)honyar_malloc(ILINK_BUF_CNT * sizeof(I_LINK_CONNECT_WIFI_FRAME_HEAD_SHORT_STR));
     memset(_g_pilink_recv_buf, 0, (sizeof(I_LINK_CONNECT_WIFI_FRAME_HEAD_SHORT_STR) * ILINK_BUF_CNT));
 
@@ -1030,6 +1039,7 @@ void ICACHE_FLASH_ATTR honyar_ilink_init(void)
     InitMonStr();
     InitStaMulticastStr();
 
+    hy_info("wifi_promiscuous_enable...\r\n");
     {
         wifi_set_promiscuous_rx_cb(ilink_recv_event);           
         
@@ -1042,7 +1052,14 @@ void ICACHE_FLASH_ATTR honyar_ilink_init(void)
     /* 选择通道 */
     CurrentGroupPoint = 0;
     wifi_set_channel(ChnGruop[CurrentGroupPoint]);
-    
-    honyar_add_task(dl_ilink_task, NULL, 0);
+    hy_printf("channel: %d\r\n", ChnGruop[CurrentGroupPoint]);
+    honyar_add_task(honyar_ilink_task, NULL, 0);
+}
+
+void ICACHE_FLASH_ATTR 
+honyar_ilink_init(void)
+{
+    honyar_wifi_scan();
+    honyar_add_task(_honyar_ilink_init, NULL, 1000 / TASK_CYCLE_TM_MS);
 }
 

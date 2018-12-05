@@ -64,6 +64,7 @@ static void ICACHE_FLASH_ATTR http_upgrade_recv(void *arg, char *data, unsigned 
     } else if(ret > 0){
         http_upgrade_destroy(NULL);
         wait_upgrade_reboot();
+        honyar_sys_reboot(0);//used to cancel timer.
     }
 }
 

@@ -6,7 +6,7 @@
 
 static wifi_station_status_cb_t g_wifi_station_status_cb;
 
-static uint8_t g_wifi_work_status = WIFI_MESH_STATUS;
+static uint8_t g_wifi_work_status = WIFI_SMARTCONFIG_STATUS;
 static uint8_t g_wifi_router_ssid[WIFI_SSID_LEN + 4] = WIFI_SSID_DEF;
 static uint8_t g_wifi_router_passwd[WIFI_PASSWD_LEN + 4] = WIFI_PWD_DEF;
 
@@ -132,6 +132,11 @@ honyar_wifi_init(void)
     honyar_add_task(honyar_wifi_sta_workstation, NULL, 1000 / TASK_CYCLE_TM_MS);
 }
 
+uint32_t ICACHE_FLASH_ATTR
+honyar_wifi_scan_isover(void)
+{
+    return g_wifi_scan_over_flag;
+}
 
 static void ICACHE_FLASH_ATTR 
 honyar_wifi_station_scan_cb(void *arg, STATUS status)
@@ -144,12 +149,12 @@ honyar_wifi_station_scan_cb(void *arg, STATUS status)
     
     if(OK != status) {
         hy_error("station scan done failed. status: %d\r\n", status);
-        return;
+        goto end;
     }
 
     struct bss_info *bss_link = (struct bss_info *)arg;
     if(!g_wifi_scan_info) {
-        return;
+        goto end;
     }
     
     while(bss_link) {
@@ -207,14 +212,15 @@ honyar_wifi_station_scan_cb(void *arg, STATUS status)
         
         bss_link = bss_link->next.stqe_next;
     }
-    
-    hy_info("station scan ok.\r\n");
+
+end:
+    hy_info("station scan over.\r\n");
     g_wifi_scan_over_flag = 1;
 }
 
 
 int32_t ICACHE_FLASH_ATTR
-dl_wifi_scan(uint32_t timeout)
+honyar_wifi_scan(void)
 {
     uint32_t sleep_time = 0;
     
@@ -231,27 +237,30 @@ dl_wifi_scan(uint32_t timeout)
         return -1;
     }
 
+#if 1
     if(!wifi_station_scan(NULL, honyar_wifi_station_scan_cb)) {
         hy_error("station scan failed.\r\n");
         return -1;
     }
-    
-    while(!g_wifi_scan_over_flag) {
-        if(sleep_time > timeout) {
-            hy_info("station scan timeout");
-            break;
-        }
-        sleep_time += 100;
-        honyar_msleep(100);
+#else
+    struct scan_config sconf;
+    memset(&sconf, 0, sizeof(struct scan_config));
+    sconf.show_hidden = 1;
+    sconf.scan_type = 0;
+    sconf.scan_time.active.min = 100;
+    sconf.scan_time.active.max = 300;
+    if(!wifi_station_scan(&sconf, honyar_wifi_station_scan_cb)) {
+        hy_error("station scan failed.\r\n");
+        return -1;
     }
+#endif
     
-    hy_info("station scan over. HEAP FREE MEM: %u.\r\n", system_get_free_heap_size());
     return 0;
 }
 
 
 int32_t ICACHE_FLASH_ATTR
-dl_wifi_get_list( wifi_scan_result_info_t **list, uint32_t *num)
+honyar_wifi_get_list( wifi_scan_result_info_t **list, uint32_t *num)
 {
     if(g_wifi_scan_info) {
         *num = g_wifi_ap_cnt;

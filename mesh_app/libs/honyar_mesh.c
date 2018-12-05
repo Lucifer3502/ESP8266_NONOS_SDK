@@ -49,8 +49,11 @@ static void ICACHE_FLASH_ATTR honyar_mesh_packet_parser(void *arg, uint8_t *pdat
     enum mesh_usr_proto_type proto;
     struct mesh_header_format *header = (struct mesh_header_format *)pdata;
 
-    if (!espconn_mesh_get_usr_data_proto(header, &proto))
+    if (!espconn_mesh_get_usr_data_proto(header, &proto)) {
+        hy_error("get proto failed.\r\n");
         return;
+    }
+    
     if (!espconn_mesh_get_usr_data(header, &usr_data, &usr_data_len)) {
         // mesh topology packet
         if(M_PROTO_NONE == proto) {

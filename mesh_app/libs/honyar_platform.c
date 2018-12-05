@@ -131,7 +131,10 @@ static void ICACHE_FLASH_ATTR honyar_task(void *arg)
 {
     uint32_t i = 0;
     static uint32_t cycle = 0;
-    
+    if(g_reboot) {
+        system_restart();
+        return;
+    }
     for(i = 0; i < TASK_MAX_NUM; i++) {
         if(0 == g_honyar_tasks[i].enable) {
             continue;
@@ -149,10 +152,6 @@ static void ICACHE_FLASH_ATTR honyar_task(void *arg)
     cycle++;
     system_soft_wdt_feed();
     os_timer_arm(&g_honyar_platform_timer, TASK_CYCLE_TM_MS, false);
-
-    if(g_reboot) {
-        system_restart();
-    }
 }
 
 static void ICACHE_FLASH_ATTR honyar_platform_task(void *parm)

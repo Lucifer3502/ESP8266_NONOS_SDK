@@ -49,7 +49,7 @@ static void ICACHE_FLASH_ATTR user_config_regist(void)
     }
 }
 
-static void ICACHE_FLASH_ATTR user_wifi_init(void)
+static void ICACHE_FLASH_ATTR user_wifi_init(void *parm)
 {
     uint8_t status = honyar_wifi_get_work_status();
     honyar_wifi_init();
@@ -62,6 +62,7 @@ static void ICACHE_FLASH_ATTR user_wifi_init(void)
     } else if(WIFI_SMARTCONFIG_STATUS == status) {
         honyar_ilink_init();
         honyar_wifi_set_work_status(WIFI_MESH_STATUS);
+        dl_config_commit_later();
         dl_config_commit(0);
     } else {
         hy_error("Invalid wifi work status, status = %d\r\n", status);
@@ -69,16 +70,20 @@ static void ICACHE_FLASH_ATTR user_wifi_init(void)
         dl_config_commit(1);
         honyar_sys_reboot(0);
     }
+
+    honyar_del_task(user_wifi_init);
 }
 
 void ICACHE_FLASH_ATTR user_init(void)
-{    
+{
     honyar_platform_init();
+    
     user_config_regist();
     dl_config_init();
 
     uart_app_init();
+    
+    honyar_add_task(user_wifi_init, NULL, 0);
 
-    user_wifi_init();
 }
 

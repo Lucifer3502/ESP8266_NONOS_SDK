@@ -13,4 +13,7 @@ int32_t hy_byte2hex(unsigned char *dest, unsigned int dest_len, unsigned char *s
 
 void honyar_memmove(void *dest, void *src, unsigned int len);
 
+uint16_t modbus_crc16 (uint8_t *data, uint8_t len);
+
+
 #endif
