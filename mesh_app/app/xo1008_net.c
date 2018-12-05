@@ -8,7 +8,7 @@
 
 static uint32_t g_xo1008_net_seq;
 
-static void 
+static void ICACHE_FLASH_ATTR
 xo1008_net_recv(uint8_t *data, uint32_t len)
 {
     cJSON *root = cJSON_Parse(data);
@@ -40,7 +40,8 @@ end:
 }
 
 
-static void xo1007_heartbeat(void)
+static void ICACHE_FLASH_ATTR
+xo1007_heartbeat(void)
 {
     cJSON *root = cJSON_CreateObject();
     char *fmt = NULL;
@@ -91,10 +92,11 @@ xo1008_heart(void *parm)
     }
 }
 
-static void ICACHE_FLASH_ATTR
+void ICACHE_FLASH_ATTR
 xo1008_net_init(void)
 {
     mesh_regist_packet_recv_cb(xo1008_net_recv);
     honyar_add_task(xo1008_heart, NULL, 1000 / TASK_CYCLE_TM_MS);
+    mesh_app_init();
 }
 

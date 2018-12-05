@@ -56,7 +56,7 @@ static void ICACHE_FLASH_ATTR user_wifi_init(void *parm)
     honyar_wifi_station_regist_statuscb(wifi_station_cb);
 
     if(WIFI_MESH_STATUS == status) {
-        mesh_app_init();
+        xo1008_net_init();
     } else if(WIFI_STA_STATUS == status) {
         honyar_wifi_station_start(honyar_wifi_get_router_ssid(), honyar_wifi_get_router_passwd());
     } else if(WIFI_SMARTCONFIG_STATUS == status) {

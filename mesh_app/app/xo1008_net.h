@@ -5,6 +5,6 @@
 #include "honyar_types.h"
 
 
-
+void xo1008_net_init(void);
 
 #endif
