@@ -4,9 +4,19 @@
 
 #define HY_MESH_AUTH  AUTH_WPA2_PSK
 #define HY_MESH_MAX_HOP  4
+#define HY_MESH_SSID_PREFIX_DEF "HONYAR_"
+#define HY_MESH_AP_PASSWD_DEF   "zWG9kvcCFS"
 
-//"C8:3A:35:5F:18:D8"
-static uint8_t g_mesh_groupid[MESH_GROUP_ID_SIZE] = {0x18,0xfe,0x34,0x00,0x00,0x51};
+
+
+//MESH CONFIG LIST START:
+static uint8_t g_mesh_groupid[MESH_GROUP_ID_SIZE] = {0x18,0xfe,0x34,0x00,0x00,0x50};
+static uint8_t g_mesh_ssid_prefix[WIFI_SSID_LEN] = HY_MESH_SSID_PREFIX_DEF;
+static uint8_t g_mesh_server_ipaddr[NET_IP_ADDR_LEN];
+static uint16_t g_mesh_server_port;
+//MESH CONFIG LIST END.
+
+
 static honyar_mesh_recv_handle_t g_mesh_recv_handle;
 
 static void ICACHE_FLASH_ATTR
@@ -85,29 +95,39 @@ honyar_mesh_recv(void *arg, char *data, unsigned short len)
     honyar_mesh_packet_parser(arg, data, len);
 }
 
+static void ICACHE_FLASH_ATTR 
+honyar_mesh_callback(int8_t res)
+{
+    uint8_t status = espconn_mesh_get_status();
+    hy_info("mesh status: %d\r\n", status);
+}
 
 int32_t ICACHE_FLASH_ATTR
-honyar_mesh_init(honyar_mesh_info_t *info)
+honyar_mesh_init(void)
 {
+    struct ip_addr server;
+    struct station_config sta_conf;
+    
     espconn_mesh_print_ver();
+    
+    server.addr = ipaddr_addr(g_mesh_server_ipaddr);
+    os_memset(&sta_conf, 0, sizeof(struct station_config));
+	os_sprintf(sta_conf.ssid, "%s", honyar_wifi_get_router_ssid());
+	os_sprintf(sta_conf.password, "%s", honyar_wifi_get_router_passwd());
 
     //wifi_set_opmode_current(STATIONAP_MODE);
-    if(NULL == info) {
-        hy_error("no mesh info\r\n");
-        return -1;
-    }
-    if (!espconn_mesh_encrypt_init(HY_MESH_AUTH, info->pwd, info->pwd_len)) {
-        hy_error("set pw fail\r\n");
+    if (!espconn_mesh_encrypt_init(HY_MESH_AUTH, HY_MESH_AP_PASSWD_DEF, os_strlen(HY_MESH_AP_PASSWD_DEF))) {
+        hy_error("mesh set pw fail\r\n");
         return -1;
     }
 
     if (!espconn_mesh_set_max_hops(HY_MESH_MAX_HOP)) {
-        hy_error("fail, max_hop:%d\r\n", espconn_mesh_get_max_hops());
+        hy_error("mesh fail, max_hop:%d\r\n", espconn_mesh_get_max_hops());
         return -1;
     }
 
-    if (!espconn_mesh_set_ssid_prefix(info->ssid_prefix, info->ssid_len)) {
-        hy_error("set prefix fail\r\n");
+    if (!espconn_mesh_set_ssid_prefix(g_mesh_ssid_prefix, os_strlen(g_mesh_ssid_prefix))) {
+        hy_error("mesh set prefix fail\r\n");
         return -1;
     }
 
@@ -116,17 +136,24 @@ honyar_mesh_init(honyar_mesh_info_t *info)
      * mesh_group_id and mesh_ssid_prefix represent mesh network
      */
     if (!espconn_mesh_group_id_init(g_mesh_groupid, MESH_GROUP_ID_SIZE)) {
-        hy_error("set grp id fail\n");
+        hy_error("mesh set grp id fail\n");
         return -1;
     }
 
     /*
      * set cloud server ip and port for mesh node
      */
-    if (!espconn_mesh_server_init((struct ip_addr *)&info->server, info->port)) {
-        hy_error("server_init fail\n");
+    if (!espconn_mesh_server_init((struct ip_addr *)&server, g_mesh_server_port)) {
+        hy_error("mesh server_init fail\n");
         return -1;
     }
+
+    if(!espconn_mesh_set_router(&sta_conf)) {
+        hy_error("mesh set router fail\n");
+        return -1;
+    }
+    
+    espconn_mesh_enable(honyar_mesh_callback, MESH_ONLINE);
 
     return 0;
 }
@@ -220,8 +247,39 @@ TOPO_FAIL:
 }
 
 void ICACHE_FLASH_ATTR
+honyar_mesh_config_regist(void)
+{
+    DL_CONFIG_ITEM_S config_items[] = 
+	{
+        {"CFG_MESH_GROUP_ID", DL_CFG_ITEM_TYPE_HEX_STR, g_mesh_groupid, sizeof(g_mesh_groupid), 0},
+        {"CFG_MESH_SSID_PREFIX", DL_CFG_ITEM_TYPE_STRING, g_mesh_ssid_prefix, sizeof(g_mesh_ssid_prefix), 0},
+        {"CFG_MESH_SERVER_IPADDR", DL_CFG_ITEM_TYPE_STRING, g_mesh_server_ipaddr, sizeof(g_mesh_server_ipaddr), 0},
+        {"CFG_MESH_SERVER_PORT", DL_CFG_ITEM_TYPE_DEC16, &g_mesh_server_port, sizeof(g_mesh_server_port), 0},
+	};
+
+	uint32_t i;
+	for (i = 0; i < sizeof(config_items)/sizeof(config_items[0]); i++)
+	{
+        dl_config_items_register_by_user(&config_items[i]);
+    }
+}
+
+void ICACHE_FLASH_ATTR
 honyar_mesh_get_gid(uint8_t gid[MESH_GROUP_ID_SIZE])
 {
     os_memcpy(gid, g_mesh_groupid, MESH_GROUP_ID_SIZE);
 }
+
+void ICACHE_FLASH_ATTR
+honyar_mesh_get_server_ipaddr(uint8_t ip[NET_IP_ADDR_LEN])
+{
+    os_memcpy(ip, g_mesh_server_ipaddr, NET_IP_ADDR_LEN);
+}
+
+uint16_t ICACHE_FLASH_ATTR
+honyar_mesh_get_server_port(void)
+{
+    return g_mesh_server_port;
+}
+
 

@@ -1,12 +1,6 @@
 #include "honyar_common.h"
 #include "mesh_app.h"
 
-#define MESH_SSID_PREFIX "ZHIHE_"
-#define MESH_AP_PWD     "zWG9kvcCFS"
-
-
-#define MESH_SERVER_IP_ADDR  "192.168.0.100"
-#define MESH_SERVER_PORT     8088
 
 static esp_tcp g_mesh_iface;
 static struct espconn g_mesh_network;
@@ -34,9 +28,12 @@ mesh_packet_send(uint8_t *data, uint32_t len)
     struct mesh_header_format *header = NULL;
     uint8_t dst[ESP_MESH_ADDR_LEN] = {0};//broadcast
     uint8_t src[ESP_MESH_ADDR_LEN];
-    uint32_t server = ipaddr_addr(MESH_SERVER_IP_ADDR);
-    uint16_t port = MESH_SERVER_PORT;
     int32_t ret = -1;
+    uint8_t ipaddr[NET_IP_ADDR_LEN] = {0};
+    uint32_t addr = 0;
+    uint16_t port = honyar_mesh_get_server_port();
+    honyar_mesh_get_server_ipaddr(ipaddr);
+    addr = ipaddr_addr(ipaddr);
 
     if(NULL == data) {
         return -1;
@@ -48,8 +45,8 @@ mesh_packet_send(uint8_t *data, uint32_t len)
         return -1;
     }
 
-    os_memcpy(dst, &server, sizeof(server));
-    os_memcpy(dst + sizeof(server), &port, sizeof(port));
+    os_memcpy(dst, &addr, sizeof(addr));
+    os_memcpy(dst + sizeof(addr), &port, sizeof(port));
     
     header = (struct mesh_header_format *)espconn_mesh_create_packet(
                     dst,   // destiny address
@@ -150,14 +147,17 @@ mesh_recon_cb(void *arg, sint8 err)
 static void ICACHE_FLASH_ATTR 
 mesh_client_init(void)
 {
-    uint32_t ip = ipaddr_addr(MESH_SERVER_IP_ADDR);
+    uint8_t ipaddr[NET_IP_ADDR_LEN] = {0};
+    uint32_t addr = 0;
+    honyar_mesh_get_server_ipaddr(ipaddr);
+    addr = ipaddr_addr(ipaddr);
     memset(&g_mesh_network, 0, sizeof(g_mesh_network));
     memset(&g_mesh_iface, 0, sizeof(g_mesh_iface));
     
     g_mesh_network.type = ESPCONN_TCP;
     g_mesh_network.state = ESPCONN_NONE;
-    memcpy(g_mesh_iface.remote_ip, &ip, sizeof(ip));
-    g_mesh_iface.remote_port = MESH_SERVER_PORT;
+    memcpy(g_mesh_iface.remote_ip, &addr, sizeof(addr));
+    g_mesh_iface.remote_port = honyar_mesh_get_server_port();
     g_mesh_iface.local_port = espconn_port();
     g_mesh_network.proto.tcp = &g_mesh_iface;
 
@@ -197,100 +197,13 @@ mesh_app_topo_task(void *parm)
     honyar_mesh_topo_query(&g_mesh_network);
 }
 
-#if 0
-static void ICACHE_FLASH_ATTR 
-mesh_app_test(void *parm)
-{
-#if 0
-    hy_info("mesh_app_test\r\n");
-#else 
-    struct mesh_header_format *header = NULL;
-    uint8_t dst[ESP_MESH_ADDR_LEN] = {0};//broadcast
-    uint8_t src[ESP_MESH_ADDR_LEN];
-    uint8_t buf[16] = "hello world";
-    uint32_t server = ipaddr_addr(MESH_SERVER_IP_ADDR);
-    uint16_t port = MESH_SERVER_PORT;
-    
-    hy_info("mesh_app_test\r\n");
-    if(espconn_mesh_is_root()) {
-        hy_info("I am root node\r\n");
-    } else {
-        hy_info("I am sub node\r\n");
-    }
-    if(!g_mesh_network_connected) {
-        return;
-    }
-    if (honyar_wifi_get_macaddr(src)) {
-        return;
-    }
-
-    os_memcpy(dst, &server, sizeof(server));
-    os_memcpy(dst + sizeof(server), &port, sizeof(port));
-    
-    header = (struct mesh_header_format *)espconn_mesh_create_packet(
-                    dst,   // destiny address
-                    src,   // source address
-                    false, // not p2p packet
-                    true,  // piggyback congest request
-                    M_PROTO_BIN,  // packe with JSON format
-                    os_strlen(buf),  // data length
-                    false, // no option
-                    0,     // option len
-                    false, // no frag
-                    0,     // frag type, this packet doesn't use frag
-                    false, // more frag
-                    0,     // frag index
-                    0);    // frag length
-    if (!header) {
-        hy_error("create packet fail\n");
-        return;
-    }
-
-    if (!espconn_mesh_set_usr_data(header, buf, os_strlen(buf))) {
-        hy_error("set user data fail\n");
-        goto end;
-    }
-
-    mesh_send((void *)header, header->len);
- 
-end:
-    os_free(header);
-#endif
-}
-#endif
-
-static void ICACHE_FLASH_ATTR 
-mesh_app_callback(int8_t res)
-{
-    uint8_t status = espconn_mesh_get_status();
-    hy_info("mesh status: %d\r\n", status);
-}
-
-
 int32_t ICACHE_FLASH_ATTR 
 mesh_app_init(void)
 {
-    struct station_config sta_conf;
-    honyar_mesh_info_t info;
-
-    os_memset(&sta_conf, 0, sizeof(struct station_config));
-	os_sprintf(sta_conf.ssid, "%s", honyar_wifi_get_router_ssid());
-	os_sprintf(sta_conf.password, "%s", honyar_wifi_get_router_passwd());
-    
-    memset(&info, 0, sizeof(info));
-    info.ssid_prefix = MESH_SSID_PREFIX;
-    info.ssid_len = strlen(MESH_SSID_PREFIX);
-    info.pwd = MESH_AP_PWD;
-    info.pwd_len = strlen(MESH_AP_PWD);
-    info.server.addr = ipaddr_addr(MESH_SERVER_IP_ADDR);
-    info.port = MESH_SERVER_PORT;
-    
-    if(honyar_mesh_init(&info)){
+    if(honyar_mesh_init()){
         return -1;
     }
-
-    espconn_mesh_set_router(&sta_conf);
-    espconn_mesh_enable(mesh_app_callback, MESH_ONLINE);
+    
     honyar_add_task(mesh_app_task, NULL, 1000 / TASK_CYCLE_TM_MS);
 
     honyar_add_task(mesh_app_topo_task, NULL, 5000 / TASK_CYCLE_TM_MS);

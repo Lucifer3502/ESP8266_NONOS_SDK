@@ -16,6 +16,7 @@ static os_timer_t g_honyar_platform_timer;
 static uint8_t g_reboot;
 
 void honyar_wifi_config_regist(void);
+void honyar_mesh_config_regist(void);
 void honyar_device_config_regist(void);
 
 void ICACHE_FLASH_ATTR honyar_usleep(uint32_t us)
@@ -174,6 +175,7 @@ static void ICACHE_FLASH_ATTR _honyar_platform_init(void)
 static void honyar_config_regist(void)
 {
     honyar_wifi_config_regist();
+    honyar_mesh_config_regist();
     honyar_device_config_regist();
 }
 
