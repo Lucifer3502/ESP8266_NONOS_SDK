@@ -5,6 +5,9 @@
 #include "honyar_types.h"
 #include "ip_addr.h"
 #include "espconn.h"
+#include "mesh.h"
+
+#define MESH_GROUP_ID_SIZE  ESP_MESH_ADDR_LEN
 
 typedef struct honyar_mesh_info{
     uint8_t *ssid_prefix;
@@ -23,7 +26,8 @@ int32_t honyar_mesh_init(honyar_mesh_info_t *info);
 
 void honyar_mesh_regist_recv_cb(honyar_mesh_recv_handle_t cb);
 
-void mesh_topo_query(struct espconn *network);
+void honyar_mesh_topo_query(struct espconn *network);
 
+void honyar_mesh_get_gid(uint8_t gid[MESH_GROUP_ID_SIZE]);
 
 #endif

@@ -15,7 +15,7 @@ parse_http_head(uint8_t *buf, uint32_t len, uint32_t *offset)
     }
 
     while(len - tag >= tail_size) {
-        if(memcmp(buf + tag, HTTP_TAIL_TAG, tail_size)) {
+        if(os_memcmp(buf + tag, HTTP_TAIL_TAG, tail_size)) {
             tag++;
             continue;
         }
@@ -25,6 +25,40 @@ parse_http_head(uint8_t *buf, uint32_t len, uint32_t *offset)
 
     return -1;
 }
+
+int32_t ICACHE_FLASH_ATTR
+parse_http_url(uint8_t *url, uint8_t **ip, uint16_t *port, uint8_t **path)
+{
+	uint8_t *find;
+    *port = 80;
+    
+    if (!url) {
+        return -1;
+    }
+
+    if (!os_strncmp(url, "http://", strlen("http://"))) {
+        *ip = url + os_strlen("http://");
+    } else if (!os_strncmp(url, "https://", os_strlen("https://"))) {
+        *ip = url + os_strlen("https://");
+    } else {
+        *ip = url;
+    }
+    find = os_strchr(*ip, '/');
+    if(NULL == find) {
+        return -1;
+    }
+    *find = 0;//the front is ip, the back is path;
+    *path = find + 1;
+
+    find = os_strchr(*ip, ':');
+    if(find) {
+        *port = atoi(find + 1);
+        *find = 0;
+    }
+
+	return 0;
+}
+
 
 void ICACHE_FLASH_ATTR
 hex_printf(uint8_t *head, uint8_t *buf, uint32_t len)

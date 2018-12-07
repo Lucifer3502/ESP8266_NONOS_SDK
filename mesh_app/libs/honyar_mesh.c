@@ -6,7 +6,7 @@
 #define HY_MESH_MAX_HOP  4
 
 //"C8:3A:35:5F:18:D8"
-static const uint8_t MESH_GROUP_ID[6] = {0x18,0xfe,0x34,0x00,0x00,0x50};
+static uint8_t g_mesh_groupid[MESH_GROUP_ID_SIZE] = {0x18,0xfe,0x34,0x00,0x00,0x51};
 static honyar_mesh_recv_handle_t g_mesh_recv_handle;
 
 static void ICACHE_FLASH_ATTR
@@ -40,7 +40,8 @@ honyar_mesh_topo_proto_parser(const void *mesh_header, uint8_t *pdata, uint16_t 
     mesh_device_disp_mac_list();
 }
 
-static void ICACHE_FLASH_ATTR honyar_mesh_packet_parser(void *arg, uint8_t *pdata, uint16_t len)
+static void ICACHE_FLASH_ATTR
+honyar_mesh_packet_parser(void *arg, uint8_t *pdata, uint16_t len)
 {
     uint16_t i = 0;
     uint8_t src[ESP_MESH_ADDR_LEN] = {0};
@@ -77,14 +78,16 @@ static void ICACHE_FLASH_ATTR honyar_mesh_packet_parser(void *arg, uint8_t *pdat
     }
 }
 
-void ICACHE_FLASH_ATTR honyar_mesh_recv(void *arg, char *data, unsigned short len)
+void ICACHE_FLASH_ATTR
+honyar_mesh_recv(void *arg, char *data, unsigned short len)
 {
     //hy_info("mesh recv total len: %d\r\n", len);
     honyar_mesh_packet_parser(arg, data, len);
 }
 
 
-int32_t ICACHE_FLASH_ATTR honyar_mesh_init(honyar_mesh_info_t *info)
+int32_t ICACHE_FLASH_ATTR
+honyar_mesh_init(honyar_mesh_info_t *info)
 {
     espconn_mesh_print_ver();
 
@@ -112,7 +115,7 @@ int32_t ICACHE_FLASH_ATTR honyar_mesh_init(honyar_mesh_info_t *info)
      * mesh_group_id
      * mesh_group_id and mesh_ssid_prefix represent mesh network
      */
-    if (!espconn_mesh_group_id_init((uint8_t *)MESH_GROUP_ID, sizeof(MESH_GROUP_ID))) {
+    if (!espconn_mesh_group_id_init(g_mesh_groupid, MESH_GROUP_ID_SIZE)) {
         hy_error("set grp id fail\n");
         return -1;
     }
@@ -128,12 +131,14 @@ int32_t ICACHE_FLASH_ATTR honyar_mesh_init(honyar_mesh_info_t *info)
     return 0;
 }
 
-void ICACHE_FLASH_ATTR honyar_mesh_regist_recv_cb(honyar_mesh_recv_handle_t cb)
+void ICACHE_FLASH_ATTR
+honyar_mesh_regist_recv_cb(honyar_mesh_recv_handle_t cb)
 {
     g_mesh_recv_handle = cb;
 }
 
-void ICACHE_FLASH_ATTR mesh_topo_query(struct espconn *network)
+void ICACHE_FLASH_ATTR
+honyar_mesh_topo_query(struct espconn *network)
 {
     uint8_t src[ESP_MESH_ADDR_LEN] = {0};
     uint8_t dst[ESP_MESH_ADDR_LEN] = {0};
@@ -212,5 +217,11 @@ void ICACHE_FLASH_ATTR mesh_topo_query(struct espconn *network)
 TOPO_FAIL:
     option ? os_free(option) : 0;
     header ? os_free(header) : 0;
+}
+
+void ICACHE_FLASH_ATTR
+honyar_mesh_get_gid(uint8_t gid[MESH_GROUP_ID_SIZE])
+{
+    os_memcpy(gid, g_mesh_groupid, MESH_GROUP_ID_SIZE);
 }
 

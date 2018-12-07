@@ -16,12 +16,14 @@ static uint8_t g_http_upgrade_start;
 
 static void http_upgrade_destroy(void *arg);
 
-static void ICACHE_FLASH_ATTR http_upgrade_send(uint8_t *data, uint32_t len)
+static void ICACHE_FLASH_ATTR
+http_upgrade_send(uint8_t *data, uint32_t len)
 {
     espconn_send(&g_http_network, data, len);
 }
 
-static void ICACHE_FLASH_ATTR http_upgrade_request(http_upgrade_info_t *info)
+static void ICACHE_FLASH_ATTR
+http_upgrade_request(http_upgrade_info_t *info)
 {
     uint8_t *buf = (uint8_t *)honyar_malloc(HTTP_UPGRADE_BUF_SIZE);
     memset(buf, 0, HTTP_UPGRADE_BUF_SIZE);
@@ -34,7 +36,8 @@ static void ICACHE_FLASH_ATTR http_upgrade_request(http_upgrade_info_t *info)
     http_upgrade_send(buf, os_strlen((char *)buf));
 }
 
-static int32_t ICACHE_FLASH_ATTR http_upgrade_reconnect(void)
+static int32_t ICACHE_FLASH_ATTR
+http_upgrade_reconnect(void)
 {
     if(g_http_reconnect_enable) {
         espconn_connect(&g_http_network);
@@ -42,7 +45,8 @@ static int32_t ICACHE_FLASH_ATTR http_upgrade_reconnect(void)
 }
 
 // notify at module that espconn has received data
-static void ICACHE_FLASH_ATTR http_upgrade_recv(void *arg, char *data, unsigned short len)
+static void ICACHE_FLASH_ATTR
+http_upgrade_recv(void *arg, char *data, unsigned short len)
 {
     uint32_t offset = 0;
     int32_t ret;
@@ -68,12 +72,14 @@ static void ICACHE_FLASH_ATTR http_upgrade_recv(void *arg, char *data, unsigned 
     }
 }
 
-static void ICACHE_FLASH_ATTR http_upgrade_send_cb(void *arg)
+static void ICACHE_FLASH_ATTR
+http_upgrade_send_cb(void *arg)
 {
     
 }
 
-static void ICACHE_FLASH_ATTR http_upgrade_discon_cb(void *arg)
+static void ICACHE_FLASH_ATTR
+http_upgrade_discon_cb(void *arg)
 {
   struct espconn *espconn_ptr = (struct espconn *)arg;
 
@@ -82,7 +88,8 @@ static void ICACHE_FLASH_ATTR http_upgrade_discon_cb(void *arg)
   http_upgrade_reconnect();
 }
 
-static void ICACHE_FLASH_ATTR http_upgrade_connect_cb(void *arg)
+static void ICACHE_FLASH_ATTR
+http_upgrade_connect_cb(void *arg)
 {
 	hy_info("http_upgrade espconn connected\r\n");
 	espconn_set_opt((struct espconn*)arg, ESPCONN_COPY);
@@ -90,7 +97,8 @@ static void ICACHE_FLASH_ATTR http_upgrade_connect_cb(void *arg)
     http_upgrade_request(&g_http_upgrade_info);
 }
 
-static void ICACHE_FLASH_ATTR http_upgrade_recon_cb(void *arg, sint8 err)
+static void ICACHE_FLASH_ATTR
+http_upgrade_recon_cb(void *arg, sint8 err)
 {
 	struct espconn *espconn_ptr = (struct espconn *)arg;
 
@@ -100,7 +108,8 @@ static void ICACHE_FLASH_ATTR http_upgrade_recon_cb(void *arg, sint8 err)
 }
 
 
-static void ICACHE_FLASH_ATTR http_upgrade_destroy(void *arg)
+static void ICACHE_FLASH_ATTR
+http_upgrade_destroy(void *arg)
 {
     hy_info("http upgrade over\r\n");
     os_timer_disarm(&g_http_timer);
@@ -111,7 +120,8 @@ static void ICACHE_FLASH_ATTR http_upgrade_destroy(void *arg)
     upgrading_unlock();
 }
 
-int32_t ICACHE_FLASH_ATTR http_upgrade_init(http_upgrade_info_t *info)
+int32_t ICACHE_FLASH_ATTR
+http_upgrade_init(http_upgrade_info_t *info)
 {
     uint32 ip = 0;
     
@@ -146,5 +156,26 @@ int32_t ICACHE_FLASH_ATTR http_upgrade_init(http_upgrade_info_t *info)
     g_http_upgrade_start = 0;
     espconn_connect(&g_http_network);
     
+}
+
+int32_t ICACHE_FLASH_ATTR
+http_upgrade_init2(uint8_t *url)
+{
+    http_upgrade_info_t info;
+    uint8_t *ip = NULL;
+    uint16_t port = 0;
+    uint8_t *file = 0;
+    memset(&info, 0, sizeof(info));
+    
+    if(parse_http_url(url, &ip, &port, &file)) {
+        hy_info("parse http url failed\r\n");
+        return -1;
+    }
+    
+    os_strncpy(info.host, ip, NET_IP_ADDR_LEN);
+    info.port = port;
+    os_strncpy(info.file, file, UPGRADE_FILENAME_LEN);
+
+    return http_upgrade_init(&info);
 }
 

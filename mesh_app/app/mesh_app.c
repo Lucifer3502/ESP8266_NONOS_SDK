@@ -5,7 +5,7 @@
 #define MESH_AP_PWD     "zWG9kvcCFS"
 
 
-#define MESH_SERVER_IP_ADDR  "192.168.0.3"
+#define MESH_SERVER_IP_ADDR  "192.168.0.100"
 #define MESH_SERVER_PORT     8088
 
 static esp_tcp g_mesh_iface;
@@ -76,7 +76,7 @@ mesh_packet_send(uint8_t *data, uint32_t len)
     }
 
     ret = mesh_send((void *)header, header->len);
- 
+    
 end:
     os_free(header);
     return ret;
@@ -194,9 +194,10 @@ mesh_app_topo_task(void *parm)
     if(MESH_LOCAL_AVAIL != status && MESH_ONLINE_AVAIL != status) {
         return;
     }
-    mesh_topo_query(&g_mesh_network);
+    honyar_mesh_topo_query(&g_mesh_network);
 }
 
+#if 0
 static void ICACHE_FLASH_ATTR 
 mesh_app_test(void *parm)
 {
@@ -256,6 +257,7 @@ end:
     os_free(header);
 #endif
 }
+#endif
 
 static void ICACHE_FLASH_ATTR 
 mesh_app_callback(int8_t res)
@@ -290,8 +292,6 @@ mesh_app_init(void)
     espconn_mesh_set_router(&sta_conf);
     espconn_mesh_enable(mesh_app_callback, MESH_ONLINE);
     honyar_add_task(mesh_app_task, NULL, 1000 / TASK_CYCLE_TM_MS);
-
-    honyar_add_task(mesh_app_test, NULL, 20000 / TASK_CYCLE_TM_MS);
 
     honyar_add_task(mesh_app_topo_task, NULL, 5000 / TASK_CYCLE_TM_MS);
     

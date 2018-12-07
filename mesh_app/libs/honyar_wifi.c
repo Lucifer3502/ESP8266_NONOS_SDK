@@ -1,7 +1,7 @@
 #include "honyar_common.h"
 
 #define WIFI_SSID_DEF "zhihe_test"
-#define WIFI_PWD_DEF "123456zhihe"
+#define WIFI_PWD_DEF "12345678"
 
 
 static wifi_station_status_cb_t g_wifi_station_status_cb;

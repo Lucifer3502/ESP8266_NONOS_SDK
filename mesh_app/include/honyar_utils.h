@@ -5,6 +5,8 @@
 
 int32_t parse_http_head(uint8_t *buf, uint32_t len, uint32_t *offset);
 
+int32_t parse_http_url(uint8_t *url, uint8_t **ip, uint16_t *port, uint8_t **path);
+
 void hex_printf(uint8_t *head, uint8_t *buf, uint32_t len);
 
 int hy_hex2byte(unsigned char *dest, int dest_len, unsigned char *src, int src_len);
