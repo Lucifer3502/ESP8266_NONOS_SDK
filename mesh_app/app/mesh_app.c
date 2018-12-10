@@ -80,7 +80,7 @@ end:
 }
 
 
-static int32_t ICACHE_FLASH_ATTR
+int32_t ICACHE_FLASH_ATTR
 mesh_app_reconnect(void)
 {
     espconn_mesh_connect(&g_mesh_network);

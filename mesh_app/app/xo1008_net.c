@@ -6,7 +6,7 @@
 #include "app_config.h"
 #include "xo1008_uart.h"
 
-#define XO1007_HEARTBEART_TIME 30000
+#define XO1008_HEARTBEART_TIME 30000
 #define MACSTR2 "%02X:%02X:%02X:%02X:%02X:%02X"
 
 typedef enum {
@@ -23,6 +23,7 @@ typedef enum {
 
 
 static uint32_t g_xo1008_net_seq;
+static uint32_t g_xo1008_hearbeat_flag;
 
 static void ICACHE_FLASH_ATTR
 cjson_add_protocol(cJSON *root)
@@ -181,6 +182,9 @@ xo1008_net_recv(uint8_t *data, uint32_t len)
     cJSON *item = NULL;
     uint32_t cmd = 0;
     int32_t err = 0;
+    uint8_t *ddata = NULL;
+    uint32_t ddata_len = 0;
+    
     if(!root) {
         hy_error("cJSON_Parse failed\r\n");
         return;
@@ -195,6 +199,7 @@ xo1008_net_recv(uint8_t *data, uint32_t len)
     switch(cmd) {
     case MESH_HEARTBEAT_RESP:
         hy_info("heart beat.\r\n");
+        g_xo1008_hearbeat_flag = 0;
         break;
     
     case MESH_DATA_UPLOAD_RESP:
@@ -207,11 +212,16 @@ xo1008_net_recv(uint8_t *data, uint32_t len)
             hy_error("err get json data\r\n");
             goto end;
         }
-        //fix me
-        /*
-        err = xo1008_data_download_resp(item->valuestring);
+        ddata_len = os_strlen(item->valuestring) / 2;
+        ddata = (uint8_t *)os_malloc(ddata_len);
+        if(hy_hex2byte(ddata, ddata_len, item->valuestring, os_strlen(item->valuestring))) {
+            os_free(ddata);
+            break;
+        }
+        
+        err = xo1008_uart_download(ddata, ddata_len);
         xo1008_data_download_resp(err);
-        */
+        os_free(ddata);
         break;
     
     case MESH_DEVICE_UPGRADE:
@@ -323,11 +333,20 @@ xo1008_heart(void *parm)
         return;
     }
 
+    if(g_xo1008_hearbeat_flag > 3) {
+        //timeout;
+        mesh_app_reconnect();
+        g_xo1008_hearbeat_flag = 0;
+        return;
+    }
+
     c_tm = system_get_time();
-    if(c_tm - l_tm > XO1007_HEARTBEART_TIME * 1000) {
+    if(c_tm - l_tm > XO1008_HEARTBEART_TIME * 1000) {
+        g_xo1008_hearbeat_flag++;
         xo1008_heartbeat();
         l_tm = c_tm;
     }
+    
 }
 
 void ICACHE_FLASH_ATTR

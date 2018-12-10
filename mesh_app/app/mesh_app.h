@@ -6,6 +6,8 @@
 
 typedef void (*mesh_packet_recv_handle_t)( uint8_t *pdata, uint32_t len);
 
+int32_t mesh_app_reconnect(void);
+
 void mesh_regist_packet_recv_cb(mesh_packet_recv_handle_t cb);
 
 uint32_t mesh_network_isconnected(void);

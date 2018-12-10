@@ -12,8 +12,8 @@
 //MESH CONFIG LIST START:
 static uint8_t g_mesh_groupid[MESH_GROUP_ID_SIZE] = {0x18,0xfe,0x34,0x00,0x00,0x50};
 static uint8_t g_mesh_ssid_prefix[WIFI_SSID_LEN] = HY_MESH_SSID_PREFIX_DEF;
-static uint8_t g_mesh_server_ipaddr[NET_IP_ADDR_LEN];
-static uint16_t g_mesh_server_port;
+static uint8_t g_mesh_server_ipaddr[NET_IP_ADDR_LEN] = "192.168.0.100";
+static uint16_t g_mesh_server_port = 8088;
 //MESH CONFIG LIST END.
 
 

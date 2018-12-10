@@ -214,7 +214,7 @@ honyar_wifi_station_scan_cb(void *arg, STATUS status)
     }
 
 end:
-    hy_info("station scan over.\r\n");
+    hy_info("wifi scan over.\r\n");
     g_wifi_scan_over_flag = 1;
 }
 
