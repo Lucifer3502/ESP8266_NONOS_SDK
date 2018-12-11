@@ -264,6 +264,17 @@ honyar_mesh_config_regist(void)
     }
 }
 
+uint8_t ICACHE_FLASH_ATTR
+honyar_mesh_is_valid(void)
+{
+    uint8_t status = espconn_mesh_get_status();
+    if(MESH_LOCAL_AVAIL != status && MESH_ONLINE_AVAIL != status) {
+        return 0;
+    }
+
+    return 1;
+}
+
 void ICACHE_FLASH_ATTR
 honyar_mesh_get_gid(uint8_t gid[MESH_GROUP_ID_SIZE])
 {

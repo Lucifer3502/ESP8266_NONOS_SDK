@@ -174,27 +174,21 @@ mesh_client_init(void)
 static void ICACHE_FLASH_ATTR 
 mesh_app_task(void *parm)
 {
-    uint8_t status = espconn_mesh_get_status();
-    //fix me;
-    if(MESH_LOCAL_AVAIL != status && MESH_ONLINE_AVAIL != status) {
-        return;
-    }
-    hy_debug("status = %d\r\n", status);
-    hy_debug("mesh_client_init start\r\n");
-    mesh_client_init();
-    hy_debug("mesh_client_init over\r\n");
+    if(honyar_mesh_is_valid()) {
+        hy_debug("mesh_client_init start\r\n");
+        mesh_client_init();
+        hy_debug("mesh_client_init over\r\n");
 
-    honyar_del_task(mesh_app_task);
+        honyar_del_task(mesh_app_task);
+    }
 }
 
 static void ICACHE_FLASH_ATTR 
 mesh_app_topo_task(void *parm)
 {
-    uint8_t status = espconn_mesh_get_status();
-    if(MESH_LOCAL_AVAIL != status && MESH_ONLINE_AVAIL != status) {
-        return;
+    if(honyar_mesh_is_valid()) {
+        honyar_mesh_topo_query(&g_mesh_network);
     }
-    honyar_mesh_topo_query(&g_mesh_network);
 }
 
 int32_t ICACHE_FLASH_ATTR 
@@ -206,7 +200,7 @@ mesh_app_init(void)
     
     honyar_add_task(mesh_app_task, NULL, 1000 / TASK_CYCLE_TM_MS);
 
-    honyar_add_task(mesh_app_topo_task, NULL, 5000 / TASK_CYCLE_TM_MS);
+    honyar_add_task(mesh_app_topo_task, NULL, 10000 / TASK_CYCLE_TM_MS);
     
     return 0;
 }

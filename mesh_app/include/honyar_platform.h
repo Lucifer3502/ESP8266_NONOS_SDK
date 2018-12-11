@@ -4,6 +4,8 @@
 
 #include "c_types.h"
 
+#define HONYAR_LIBS_VERSION  "1.0.0"
+
 #define TASK_MAX_NUM  20
 
 #define TASK_CYCLE_TM_MS  10
@@ -16,6 +18,10 @@ void honyar_usleep(uint32_t us);
 void honyar_msleep(uint32_t ms);
 
 void honyar_sleep(uint32_t s);
+
+void honyar_global_timer_disable(void);
+
+uint8_t honyar_global_timer_is_disable(void);
 
 void honyar_sys_reboot(uint32_t now);
 

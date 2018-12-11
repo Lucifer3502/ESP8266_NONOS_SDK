@@ -47,7 +47,7 @@ honyar_gpio_init(void)
 }
 
 static uint8_t ICACHE_FLASH_ATTR
-honyarl_gpio_find(uint8_t pin_num)
+honyar_gpio_find(uint8_t pin_num)
 {
     if(pin_num >= 1 && pin_num <=  LOGICAL_PIN_MAX_NUM) {
         return g_pin_gpio[pin_num];
@@ -67,7 +67,7 @@ honyarl_gpio_find(uint8_t pin_num)
 int32_t ICACHE_FLASH_ATTR
 honyar_gpio_config(uint8_t pin, uint8_t dir, uint8_t pull)
 {
-    uint8_t key = honyarl_gpio_find(pin);
+    uint8_t key = honyar_gpio_find(pin);
 
     if (PIN_IO_NONE == key) {
         return -1;
@@ -124,7 +124,7 @@ honyar_gpio_config(uint8_t pin, uint8_t dir, uint8_t pull)
 int32_t ICACHE_FLASH_ATTR
 honyar_gpio_set_output(uint8_t pin, uint8_t state)
 {
-    uint8_t key = honyarl_gpio_find(pin);
+    uint8_t key = honyar_gpio_find(pin);
 
     if (PIN_IO_NONE == key || GPIO_UNKNOWN == state) {   
         return -1;
@@ -149,7 +149,7 @@ honyar_gpio_set_output(uint8_t pin, uint8_t state)
 uint8_t ICACHE_FLASH_ATTR
 honyar_gpio_get_input(uint8_t pin)
 {
-    uint8_t key = honyarl_gpio_find(pin);
+    uint8_t key = honyar_gpio_find(pin);
 
     if (PIN_IO_NONE == key) {
         return GPIO_UNKNOWN;

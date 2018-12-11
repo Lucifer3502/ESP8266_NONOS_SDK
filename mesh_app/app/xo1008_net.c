@@ -5,6 +5,8 @@
 #include "mesh_app.h"
 #include "app_config.h"
 #include "xo1008_uart.h"
+#include "xo1008_upgrade.h"
+
 
 #define XO1008_HEARTBEART_TIME 30000
 #define MACSTR2 "%02X:%02X:%02X:%02X:%02X:%02X"
@@ -230,8 +232,13 @@ xo1008_net_recv(uint8_t *data, uint32_t len)
             hy_error("err get json data\r\n");
             break;
         }
-        err = http_upgrade_init2(item->valuestring);
+        err = xo1008_upgrade_set_url(item->valuestring);
         xo1008_device_upgrade_resp(err);
+        if(0 == err) {
+            honyar_wifi_set_work_status(WIFI_STA_STATUS);
+            dl_config_commit(1);
+            honyar_sys_reboot(0);
+        }
         break;
         
     default:

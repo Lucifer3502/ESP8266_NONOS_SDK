@@ -3,17 +3,18 @@
 
 
 
-struct honyar_task{
+typedef struct honyar_task_tag{
     uint32_t enable;
     task_func_t func;
     void *parm;
     uint32_t start;
     uint32_t cycle;
-};
+}honyar_task_t;
 
-static struct honyar_task g_honyar_tasks[TASK_MAX_NUM];
+static honyar_task_t g_honyar_tasks[TASK_MAX_NUM];
 static os_timer_t g_honyar_platform_timer;
 static uint8_t g_reboot;
+static uint8_t g_global_timer_disable;
 
 void honyar_wifi_config_regist(void);
 void honyar_mesh_config_regist(void);
@@ -32,6 +33,18 @@ void ICACHE_FLASH_ATTR honyar_msleep(uint32_t ms)
 void ICACHE_FLASH_ATTR honyar_sleep(uint32_t s)
 {
     honyar_msleep(s * 1000);
+}
+
+void ICACHE_FLASH_ATTR
+honyar_global_timer_disable(void)
+{
+    g_global_timer_disable = 1;
+}
+
+uint8_t ICACHE_FLASH_ATTR
+honyar_global_timer_is_disable(void)
+{
+    return g_global_timer_disable;
 }
 
 void ICACHE_FLASH_ATTR honyar_sys_reboot(uint32_t now)
@@ -132,7 +145,13 @@ static void ICACHE_FLASH_ATTR honyar_task(void *arg)
 {
     uint32_t i = 0;
     static uint32_t cycle = 0;
+    
+    if(honyar_global_timer_is_disable()) {
+        return;
+    }
+    
     if(g_reboot) {
+        honyar_global_timer_disable();
         system_restart();
         return;
     }
@@ -172,7 +191,7 @@ static void ICACHE_FLASH_ATTR _honyar_platform_init(void)
     honyar_add_task(honyar_platform_task, NULL, 10000 / TASK_CYCLE_TM_MS);
 }
 
-static void honyar_config_regist(void)
+static void ICACHE_FLASH_ATTR honyar_config_regist(void)
 {
     honyar_wifi_config_regist();
     honyar_mesh_config_regist();
@@ -182,6 +201,9 @@ static void honyar_config_regist(void)
 void ICACHE_FLASH_ATTR honyar_platform_init(void)
 {
     _honyar_platform_init();
+
+    hy_info("LIBS version: [%s], compile time: [%s - %s]\r\n", HONYAR_LIBS_VERSION, __DATE__, __TIME__);
+    
     honyar_config_regist();
     
     os_timer_disarm(&g_honyar_platform_timer);

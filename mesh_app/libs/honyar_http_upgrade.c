@@ -2,7 +2,7 @@
 #include "honyar_common.h"
 
 #define HTTP_UPGRADE_TIMEOUT  20000
-#define HTTP_UPGRADE_BUF_SIZE 1024
+#define HTTP_UPGRADE_BUF_SIZE 512
 
 static esp_tcp g_http_iface;
 static struct espconn g_http_network;
@@ -13,6 +13,7 @@ static uint8_t g_http_reconnect_enable;
 static os_timer_t g_http_timer;
 static http_upgrade_info_t g_http_upgrade_info;
 static uint8_t g_http_upgrade_start;
+static http_upgrade_failed_cb_t g_http_upgrade_failed_cb;
 
 static void http_upgrade_destroy(void *arg);
 
@@ -34,6 +35,7 @@ http_upgrade_request(http_upgrade_info_t *info)
 					info->host,
 					info->port);
     http_upgrade_send(buf, os_strlen((char *)buf));
+    honyar_free(buf);
 }
 
 static int32_t ICACHE_FLASH_ATTR
@@ -66,9 +68,10 @@ http_upgrade_recv(void *arg, char *data, unsigned short len)
         //err;
         http_upgrade_destroy(NULL);
     } else if(ret > 0){
-        http_upgrade_destroy(NULL);
+        honyar_global_timer_disable();//used to cancel timer.
+        honyar_msleep(100);
         wait_upgrade_reboot();
-        honyar_sys_reboot(0);//used to cancel timer.
+        http_upgrade_destroy(NULL);
     }
 }
 
@@ -118,6 +121,15 @@ http_upgrade_destroy(void *arg)
     espconn_disconnect(&g_http_network);
 
     upgrading_unlock();
+    if(g_http_upgrade_failed_cb) {
+        g_http_upgrade_failed_cb(NULL);
+    }
+}
+
+void ICACHE_FLASH_ATTR
+http_upgrade_regist_faild_cb(http_upgrade_failed_cb_t cb)
+{
+    g_http_upgrade_failed_cb = cb;
 }
 
 int32_t ICACHE_FLASH_ATTR

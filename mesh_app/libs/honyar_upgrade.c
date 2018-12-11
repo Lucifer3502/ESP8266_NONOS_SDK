@@ -345,5 +345,4 @@ void ICACHE_FLASH_ATTR wait_upgrade_reboot(void)
 {
     system_upgrade_flag_set(UPGRADE_FLAG_FINISH);
     system_upgrade_reboot();
-    while(1) ;
 }
