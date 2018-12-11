@@ -5,6 +5,11 @@
 
 #define XO1008_KEY_LOGIC_PIN  16
 
+enum {
+    PRESS_UP = 0,
+    PRESS_DOWN = 1,
+}xo1008_key_state_t;
+
 void xo1008_key_init(void);
 
 #endif
