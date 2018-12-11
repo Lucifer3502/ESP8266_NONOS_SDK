@@ -10,16 +10,21 @@ void ICACHE_FLASH_ATTR
 mesh_device_disp_mac_list(void)
 {
     uint16_t idx = 0;
-
+    uint8_t mac[MAC_ADDR_LEN] = {0};
+    if (honyar_wifi_get_macaddr(mac)) {
+        hy_error("get mac fail\r\n");
+        return;
+    }
     if (g_node_list.scale < 1)
         return;
 
-    hy_printf("=====mac list info=====\n");
-    hy_printf("root: " MACSTR "\n", MAC2STR(g_node_list.root.mac));
+    hy_printf("=====mac list info=====\r\n");
+    hy_printf("self: " MACSTR "\r\n", MAC2STR(mac));
+    hy_printf("root: " MACSTR "\r\n", MAC2STR(g_node_list.root.mac));
 
     for (idx = 0; idx < g_node_list.scale - 1; idx ++)
-        hy_printf("idx:%d, " MACSTR "\n", idx, MAC2STR(g_node_list.list[idx].mac));
-    hy_printf("=====mac list end======\n");
+        hy_printf("idx:%d, " MACSTR "\r\n", idx, MAC2STR(g_node_list.list[idx].mac));
+    hy_printf("=====mac list end======\r\n");
 }
 
 int32_t ICACHE_FLASH_ATTR

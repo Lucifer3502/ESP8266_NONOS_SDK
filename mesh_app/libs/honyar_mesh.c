@@ -35,7 +35,7 @@ honyar_mesh_topo_proto_parser(const void *mesh_header, uint8_t *pdata, uint16_t 
         return;
 
     header = (struct mesh_header_format *)pdata;
-    hy_info("root's mac:" MACSTR "\n", MAC2STR(header->src_addr));
+    hy_info("root's mac:" MACSTR "\r\n", MAC2STR(header->src_addr));
     mesh_device_set_root((struct mesh_device_mac_type *)header->src_addr);
 
     while (espconn_mesh_get_option(header, M_O_TOPO_RESP, op_idx++, &option)) {
@@ -75,7 +75,7 @@ honyar_mesh_packet_parser(void *arg, uint8_t *pdata, uint16_t len)
     }
 
     if (honyar_wifi_get_macaddr(src)) {
-        hy_error("get sta mac fail\n");
+        hy_error("get sta mac fail\r\n");
         return;
     }
     if(!os_memcmp(src, header->src_addr, ESP_MESH_ADDR_LEN)) {
