@@ -128,6 +128,10 @@ xo1008_led_smartconfig_mode(void)
 static void ICACHE_FLASH_ATTR
 xo1008_led_task(void *arg)
 {
+    if(honyar_global_timer_is_disable()) {
+        return;
+    }
+    
     switch(g_xo1008_led_work_mode) {
     case WIFI_STA_STATUS:
         xo1008_led_sta_mode();

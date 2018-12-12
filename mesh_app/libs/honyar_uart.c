@@ -26,7 +26,7 @@ void _uart0_one_byte_enqueue(uint8_t ch)
     g_uart0_buf.tail = (tail + 1) & (UART_RECV_BUF_SIZE - 1);
 }
 
-uint32_t ICACHE_FLASH_ATTR honyar_uart_read(uint8_t *buf, uint32_t len, uint32_t tm_out)
+uint32_t ICACHE_FLASH_ATTR honyar_uart_read(uint8_t *buf, uint32_t len, uint32_t tm_out, uint8_t wait)
 {
     uint32_t rbytes = 0;
     uint32_t count = 0;
@@ -37,7 +37,7 @@ uint32_t ICACHE_FLASH_ATTR honyar_uart_read(uint8_t *buf, uint32_t len, uint32_t
     uart_read_buff_t *rx_hd = &g_uart0_buf;
     while(1) {
         if(rx_hd->front == rx_hd->tail) {
-            if(0 == rbytes || count >= tm_out) {
+            if((0 == rbytes && 0 == wait) || count >= tm_out) {
                 break;
             }
             count++;

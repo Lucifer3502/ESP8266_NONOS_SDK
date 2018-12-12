@@ -6,6 +6,13 @@
 #define PROTOCOL_HEAD_MAGIC 0xAA
 #define PRO_BUF_SIZE 32
 
+enum {
+    TOTAL_ENERGE = 0,
+    CUR_POWER = 118,
+    ELEC_VOLTAGE = 100,
+    ELEC_CURRENT = 106,
+}modbus_fun_t;
+
 static os_timer_t g_xo1008_modbus_timer;
 
 static uint8_t ICACHE_FLASH_ATTR
@@ -86,7 +93,7 @@ xo1008_uart_download(uint8_t *data, uint32_t len)
 }
 
 static int32_t ICACHE_FLASH_ATTR
-xo1008_upload_elec(uint32_t energy, uint32_t power)
+xo1008_upload_elec(uint32_t energy, uint32_t power, uint32_t voltage, uint32_t current)
 {
     uint8_t buf[PRO_BUF_SIZE] = {0};
     uint32_t len = 0;
@@ -103,6 +110,14 @@ xo1008_upload_elec(uint32_t energy, uint32_t power)
     buf[len++] = (energy >> 8) & 0xff;
     buf[len++] = (energy >> 16) & 0xff;
     buf[len++] = (energy >> 24) & 0xff;
+    buf[len++] = voltage & 0xff;
+    buf[len++] = (voltage >> 8) & 0xff;
+    buf[len++] = (voltage >> 16) & 0xff;
+    buf[len++] = (voltage >> 24) & 0xff;
+    buf[len++] = current & 0xff;
+    buf[len++] = (current >> 8) & 0xff;
+    buf[len++] = (current >> 16) & 0xff;
+    buf[len++] = (current >> 24) & 0xff;
     buf[1] = len;
     buf[len++] = checksum(buf + 1, len - 1);
     xo1008_net_upload(buf, len);
@@ -115,8 +130,10 @@ xo1008_modbus_read_elec_parm(uint32_t *value, uint16_t func)
     uint32_t len = PRO_BUF_SIZE;
     uint32_t rbytes = 0;
     uint16_t crc = 0;
+    float f_val = 0;
+    uint32_t i_val = 0;
     //clear buf;
-    while(honyar_uart_read(buf, len, 50));
+    while(honyar_uart_read(buf, len, 50, 0));
     
     len = 0;
     buf[len++] = 0xff;//broadcast addr
@@ -130,10 +147,10 @@ xo1008_modbus_read_elec_parm(uint32_t *value, uint16_t func)
     buf[len++] = (crc >> 8) & 0xff;
     honyar_uart_write(buf, len);
 
-    if(0 == honyar_uart_read(buf, 1, 500)) {
+    if(0 == honyar_uart_read(buf, 1, 500, 1)) {
         return -1;
     }
-    rbytes = honyar_uart_read(buf + 1, 8, 50);
+    rbytes = honyar_uart_read(buf + 1, 8, 50, 1);
     if(rbytes != 8) {
         return -1;
     }
@@ -145,37 +162,68 @@ xo1008_modbus_read_elec_parm(uint32_t *value, uint16_t func)
         hy_error("modbus crc check failed.\r\n");
         return -1;
     }
+#if 0
     *value = bcd_to_hex(buf[3]) * 1000000 
                 + bcd_to_hex(buf[4]) * 10000
                 + bcd_to_hex(buf[5]) * 100
                 + bcd_to_hex(buf[6]);
-    
+#else
+    i_val = (buf[3] << 24) + 
+            (buf[4] << 16) +
+            (buf[5] << 8) +
+            buf[6];
+    memcpy(&f_val, &i_val, sizeof(uint32_t));
+    *value = f_val * 100;
+#endif
     return 0;
 }
 
 static int32_t ICACHE_FLASH_ATTR
 xo1008_modbus_read_elec_energy(uint32_t *value)
 {
-    return xo1008_modbus_read_elec_parm(value, 0x0000);
+    return xo1008_modbus_read_elec_parm(value, TOTAL_ENERGE);
 }
 
 static int32_t ICACHE_FLASH_ATTR
 xo1008_modbus_read_elec_power(uint32_t *value)
 {
-    return xo1008_modbus_read_elec_parm(value, 0x0118);
+    return xo1008_modbus_read_elec_parm(value, CUR_POWER);
 }
+
+static int32_t ICACHE_FLASH_ATTR
+xo1008_modbus_read_elec_voltage(uint32_t *value)
+{
+    return xo1008_modbus_read_elec_parm(value, ELEC_VOLTAGE);
+}
+
+static int32_t ICACHE_FLASH_ATTR
+xo1008_modbus_read_elec_current(uint32_t *value)
+{
+    return xo1008_modbus_read_elec_parm(value, ELEC_CURRENT);
+}
+
 
 static void ICACHE_FLASH_ATTR
 xo1008_modbus_task(uint32_t *value)
 {
     uint32_t energe = 0;
     uint32_t power = 0;
+    uint32_t voltage = 0;
+    uint32_t current = 0;
     int32_t err = 0;
+    
+    if(honyar_global_timer_disable()) {
+        return;
+    }
+    
     err += xo1008_modbus_read_elec_energy(&energe);
     err += xo1008_modbus_read_elec_power(&power);
+    err += xo1008_modbus_read_elec_voltage(&power);
+    err += xo1008_modbus_read_elec_current(&power);
 
     if(0 == err) {
-        xo1008_upload_elec(energe, power);
+        hy_info("energy: %u, power: %u, voltage: %u, current: %u\r\n", energe, power, voltage, current);
+        xo1008_upload_elec(energe, power, voltage, current);
     } else {
         hy_error("read elec info failed, err = %d\r\n", err);
     }

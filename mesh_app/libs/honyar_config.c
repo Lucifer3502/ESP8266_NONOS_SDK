@@ -174,7 +174,7 @@ int32_t ICACHE_FLASH_ATTR _dl_config_modify_inter(DL_CONFIG_ITEM_S *pitem, const
 	
 	if (!strcmp(pitem->name, name))
 	{
-		hy_printf(">%s=%s\n", name, value);
+		hy_printf(">%s=%s\r\n", name, value);
 		
 		ret = 0;
 
@@ -279,7 +279,7 @@ int32_t ICACHE_FLASH_ATTR dl_config_modify(const char *name, const char *value)
 
 static int32_t ICACHE_FLASH_ATTR _dl_config_show_value(const char *pname, const char *pvalue)
 {
-	hy_printf("%s=%s\n", pname, pvalue);
+	hy_printf("%s=%s\r\n", pname, pvalue);
 	return 0;
 }
 
@@ -417,7 +417,7 @@ void ICACHE_FLASH_ATTR dl_config_for_each_in_flash(CONFIG_FOR_EACH_FUNC func)
 	{
         /* 两个配置区的配置都无效，将当前的默认配置设置为配置 */
 		honyar_free(cfg_item);
-		hy_printf("--No config data!--!\n");
+		hy_printf("--No config data!--!\r\n");
 		return;
 	}	
 
@@ -437,7 +437,7 @@ void ICACHE_FLASH_ATTR dl_config_for_each_in_flash(CONFIG_FOR_EACH_FUNC func)
 		if (!strcmp(item_name, cfg_tail))
 		{
 			/* 已经到结尾了 */
-			hy_printf("--No more config data!--!\n");
+			hy_printf("--No more config data!--!\r\n");
 			break;
 		}
 
@@ -488,7 +488,7 @@ static int32_t ICACHE_FLASH_ATTR dl_config_item(const char *name, const char *va
 	if (g_config_write_addr == 0) {
 		return -1;
 	}
-	hy_printf("<%s=%s\n", name, value);
+	hy_printf("<%s=%s\r\n", name, value);
 	honyar_flash_write(g_config_write_addr, (uint8_t *)name, os_strlen(name) + 1);
 	g_config_write_addr += os_strlen(name) + 1;
 	honyar_flash_write(g_config_write_addr, (uint8_t *)value, os_strlen(value) + 1);

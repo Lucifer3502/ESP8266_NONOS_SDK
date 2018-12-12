@@ -9,7 +9,7 @@ int32_t honyar_uart_init(uint32_t baudrate);
 
 uint32_t honyar_uart_write(const uint8_t *buf, uint32_t len);
 
-uint32_t honyar_uart_read(uint8_t *buf, uint32_t len, uint32_t tm_out);
+uint32_t honyar_uart_read(uint8_t *buf, uint32_t len, uint32_t tm_out, uint8_t wait);
 
 #endif
 

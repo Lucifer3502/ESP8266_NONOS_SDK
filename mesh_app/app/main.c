@@ -34,6 +34,7 @@ user_wifi_init(void *parm)
     honyar_wifi_init();
     
     if(WIFI_MESH_STATUS == status) {
+        xo1008_uart_init();
         xo1008_net_init();
         xo1008_led_set_work_mode(WIFI_MESH_STATUS);
     } else if(WIFI_STA_STATUS == status) {
@@ -70,7 +71,6 @@ user_init(void)
 
     xo1008_key_init();
 #endif
-    xo1008_uart_init();
     
     honyar_add_task(user_wifi_init, NULL, 0);
 }
