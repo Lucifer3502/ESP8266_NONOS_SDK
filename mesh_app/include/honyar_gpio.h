@@ -52,6 +52,7 @@ typedef enum
     GPIO_UNKNOWN = 255,
 }gpio_state_t;//高低电平 
 
+uint8_t honyar_gpio_find(uint8_t pin_num);
 
 /** 
  * GPIO口初始化

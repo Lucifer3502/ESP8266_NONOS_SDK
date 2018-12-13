@@ -34,6 +34,8 @@ user_wifi_init(void *parm)
     honyar_wifi_init();
     
     if(WIFI_MESH_STATUS == status) {
+        dl_ir_tx_init();
+        dl_ir_rx_init();
         xo1008_uart_init();
         xo1008_net_init();
         xo1008_led_set_work_mode(WIFI_MESH_STATUS);

@@ -23,7 +23,8 @@ GEN_BINS= eagle.app.v6.bin
 SPECIAL_MKTARGETS=$(APP_MKTARGETS)
 SUBDIRS=    \
 	app \
-	libs
+	libs \
+	ir \
 
 endif # } PDIR
 
@@ -55,7 +56,8 @@ force_submodule_update:=$(shell git submodule init) $(shell git submodule update
 
 COMPONENTS_eagle.app.v6 = \
 	app/libapp.a \
-	libs/libhonyar.a
+	libs/libhonyar.a \
+	ir/libir.a
 
 LINKFLAGS_eagle.app.v6 = \
 	-L../lib        \

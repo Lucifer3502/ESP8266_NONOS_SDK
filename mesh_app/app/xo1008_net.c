@@ -242,7 +242,7 @@ xo1008_net_recv(uint8_t *data, uint32_t len)
         break;
         
     default:
-        hy_info("net recv cmd: %d\r\n", cmd);
+        hy_error("net recv cmd: %d\r\n", cmd);
         break;
     }
 

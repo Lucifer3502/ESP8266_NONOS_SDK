@@ -46,7 +46,7 @@ honyar_gpio_init(void)
     g_pin_gpio[23] = PIN_GPIO_5;
 }
 
-static uint8_t ICACHE_FLASH_ATTR
+uint8_t ICACHE_FLASH_ATTR
 honyar_gpio_find(uint8_t pin_num)
 {
     if(pin_num >= 1 && pin_num <=  LOGICAL_PIN_MAX_NUM) {

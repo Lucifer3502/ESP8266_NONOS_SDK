@@ -147,7 +147,7 @@ xo1008_modbus_read_elec_parm(uint32_t *value, uint16_t func)
     buf[len++] = (crc >> 8) & 0xff;
     honyar_uart_write(buf, len);
 
-    if(0 == honyar_uart_read(buf, 1, 500, 1)) {
+    if(0 == honyar_uart_read(buf, 1, 150, 1)) {
         return -1;
     }
     rbytes = honyar_uart_read(buf + 1, 8, 50, 1);
@@ -212,7 +212,7 @@ xo1008_modbus_task(uint32_t *value)
     uint32_t current = 0;
     int32_t err = 0;
     
-    if(honyar_global_timer_disable()) {
+    if(honyar_global_timer_is_disable()) {
         return;
     }
     
@@ -226,6 +226,7 @@ xo1008_modbus_task(uint32_t *value)
         xo1008_upload_elec(energe, power, voltage, current);
     } else {
         hy_error("read elec info failed, err = %d\r\n", err);
+        xo1008_upload_elec(energe, power, voltage, current);
     }
 
     os_timer_arm(&g_xo1008_modbus_timer, 60000, false);
