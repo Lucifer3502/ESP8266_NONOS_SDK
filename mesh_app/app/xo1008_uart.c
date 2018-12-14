@@ -41,7 +41,10 @@ xo1008_uart_protocol_parse(uint8_t *frame, uint32_t frame_len)
         if(0x01 == child_cmd) {
             xo1008_device_set_power(frame[11]);
         }else if(0x02 == child_cmd) {
-
+            if(dl_irda_send(&frame[12], frame_len - 12 - 1, frame[11])) {
+            	hy_error("irda send err\r\n");
+                return -1;
+            }
         } else {
             return -1;
         }
@@ -63,6 +66,7 @@ xo1008_uart_download(uint8_t *data, uint32_t len)
     uint32_t frame_len = 0;
     uint32_t offset = 0;
     uint32_t flag = 0;
+    hex_printf("download:", data, len);
     while(offset + 11 < len) {
         frame = data + offset;
         frame_len = frame[1] + (frame[2] << 8) + 1;
@@ -75,7 +79,7 @@ xo1008_uart_download(uint8_t *data, uint32_t len)
             offset++;
             continue;
         }
-        if(checksum(data + offset, frame_len - 1)){
+        if(checksum(data + offset + 1, frame_len - 1)){
             hy_error("check sum err\n");
 			offset++;
 			continue;

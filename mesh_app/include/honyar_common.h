@@ -8,6 +8,7 @@
 #include "osapi.h"
 #include "driver/uart.h"
 #include "driver/gpio16.h"
+#include "driver/hw_timer.h"
 #include "gpio.h"
 #include "user_config.h"
 #include "ip_addr.h"
@@ -32,5 +33,6 @@
 #include "honyar_mesh.h"
 #include "mesh_device.h"
 #include "honyar_device.h"
+#include "infared/honyar_ir.h"
 
 #endif

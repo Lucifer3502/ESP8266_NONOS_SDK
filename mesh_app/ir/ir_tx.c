@@ -260,7 +260,7 @@ dl_ir_tx_timer_cb(void)
     
 }
 
-uint32_t ICACHE_FLASH_ATTR
+int32_t ICACHE_FLASH_ATTR
 dl_irda_send(uint8_t *data, uint32_t data_len, IR_DATA_MODE_E ir_mode)
 {
 #if 0
@@ -270,33 +270,28 @@ dl_irda_send(uint8_t *data, uint32_t data_len, IR_DATA_MODE_E ir_mode)
     }
 #endif
 //    PrintHexData("IR_SEND:",data, data_len);
-    if(IR_TX_IDLE != g_ir_tx_state)
-    {
+    if(IR_TX_IDLE != g_ir_tx_state) {
         hy_error("IR TX BUSY.\r\n");
-        return 0;
+        return -1;
     }
     
-    if(IR_DATA_MODE != ir_mode && IR_WAVE_MODE != ir_mode)
-    {
-        return 0;
+    if(IR_DATA_MODE != ir_mode && IR_WAVE_MODE != ir_mode) {
+        return -1;
     }
 #if 1
-    if(0x26 != data[0])
-    {
+    if(0x26 != data[0]){
         hy_error("Not 38k.\r\n");
-        return 0;
+        return -1;
     }
 
     g_ir_tx_time_unit = data[1];
     g_ir_tx_level_count = data[4] + (data[5] << 8);
-    if((g_ir_tx_level_count * 2) != (data_len - 6))
-    {
-        return 0;
+    if((g_ir_tx_level_count * 2) != (data_len - 6)) {
+        return -1;
     }
 #endif
     
-    if(g_ir_tx_data)
-    {
+    if(g_ir_tx_data) {
         os_free(g_ir_tx_data);
         g_ir_tx_data = NULL;
     }
@@ -309,7 +304,7 @@ dl_irda_send(uint8_t *data, uint32_t data_len, IR_DATA_MODE_E ir_mode)
     hex_printf("IR_SEND:", g_ir_tx_data, g_ir_tx_data_len);
     g_ir_data_mode = ir_mode;
     dl_ir_tx_timer_cb();
-    return 1;
+    return 0;
 }
 
 void ICACHE_FLASH_ATTR
@@ -319,7 +314,7 @@ dl_ir_tx_init()
     os_timer_disarm(&g_ir_tx_timer);
     os_timer_setfn(&g_ir_tx_timer, dl_ir_tx_timer_cb, NULL);
 #else
-    hw_timer_init(0);
+    hw_timer_init(0, 0);
     hw_timer_set_func(dl_ir_tx_timer_cb);
     //dl_gpio_config(DELAN_IR_TX_PIN_NUM, DL_INTPUT, DL_PULL_NONE);
 #endif

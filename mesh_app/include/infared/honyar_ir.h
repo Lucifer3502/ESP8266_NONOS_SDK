@@ -18,7 +18,7 @@ typedef enum{
 
 void dl_ir_tx_init();
 
-uint32_t dl_irda_send(uint8_t *data, uint32_t data_len, IR_DATA_MODE_E ir_mode);
+int32_t dl_irda_send(uint8_t *data, uint32_t data_len, IR_DATA_MODE_E ir_mode);
 
 void dl_ir_rx_init();
 
