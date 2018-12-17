@@ -64,3 +64,4 @@ xo1008_key_init(void)
     os_timer_setfn(&g_xo1008_key_timer, (os_timer_func_t *)xo1008_key_task, NULL);
     os_timer_arm(&g_xo1008_key_timer, 10, false);
 }
+

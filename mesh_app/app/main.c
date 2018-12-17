@@ -8,7 +8,7 @@
 #include "xo1008_led.h"
 #include "xo1008_device.h"
 #include "xo1008_upgrade.h"
-
+#include "dl2106f.h"
 
 static void ICACHE_FLASH_ATTR
 wifi_station_cb(uint8_t status)
@@ -24,6 +24,11 @@ static void ICACHE_FLASH_ATTR
 user_config_regist(void)
 {
     xo1008_upgrade_config_init();
+    
+#ifdef DL2106F
+    dl2106f_config_init();
+#endif
+
 }
 
 static void ICACHE_FLASH_ATTR
@@ -36,6 +41,11 @@ user_wifi_init(void *parm)
     if(WIFI_MESH_STATUS == status) {
         dl_ir_tx_init();
         dl_ir_rx_init();
+    
+    #ifdef DL2106F
+        dl2106f_init();
+    #endif
+    
         xo1008_uart_init();
         xo1008_net_init();
         xo1008_led_set_work_mode(WIFI_MESH_STATUS);

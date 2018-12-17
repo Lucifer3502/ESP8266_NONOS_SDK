@@ -2,6 +2,7 @@
 #include "honyar_common.h"
 #include "xo1008_uart.h"
 #include "xo1008_device.h"
+#include "dl2106f.h"
 
 #define PROTOCOL_HEAD_MAGIC 0xAA
 #define PRO_BUF_SIZE 32
@@ -39,7 +40,12 @@ xo1008_uart_protocol_parse(uint8_t *frame, uint32_t frame_len)
             return -1;
         }
         if(0x01 == child_cmd) {
-            xo1008_device_set_power(frame[11]);
+#ifdef DL2106F
+            dl2106f_set_socket_power(frame[11]);
+#else 
+            hy_error("not support power on or off\r\n");
+            return -1;
+#endif
         }else if(0x02 == child_cmd) {
             if(dl_irda_send(&frame[12], frame_len - 12 - 1, frame[11])) {
             	hy_error("irda send err\r\n");

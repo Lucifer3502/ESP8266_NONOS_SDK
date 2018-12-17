@@ -14,6 +14,7 @@ FROM_SW_VER=1.0.0
 SW_VER="1.0.0"
 HW_VER=$MODULE
 
+cp ./Makefile_DL2106F ./Makefile -f
 
 make clean
 ./gen_misc_user1.sh

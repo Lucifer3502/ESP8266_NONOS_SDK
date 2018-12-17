@@ -27,5 +27,8 @@
 
 #define MESH_SDK
 
+#define USE_US_TIMER
+
+
 
 #endif
