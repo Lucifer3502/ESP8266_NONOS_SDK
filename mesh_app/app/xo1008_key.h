@@ -3,7 +3,7 @@
 
 #include "honyar_types.h"
 
-#define XO1008_KEY_LOGIC_PIN  16
+#define XO1008_KEY_LOGIC_PIN  20
 
 enum {
     PRESS_UP = 0,

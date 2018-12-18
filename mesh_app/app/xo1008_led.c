@@ -102,7 +102,7 @@ xo1008_led_mesh_mode(void)
     if(mesh_network_isconnected()) {
         xo1008_led1_on();
     }else if(cur_time - last_led1_run_time > MESH_IS_INVALID_INT) {
-        xo1008_led2_reverse();
+        xo1008_led1_reverse();
         last_led1_run_time = cur_time;
     }
 }

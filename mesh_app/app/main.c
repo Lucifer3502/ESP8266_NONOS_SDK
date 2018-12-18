@@ -78,9 +78,10 @@ user_init(void)
     
     user_config_regist();
     dl_config_init();
-#if 0
+    
+    honyar_gpio_init();
+#ifdef DL2106F
     xo1008_led_init();
-
     xo1008_key_init();
 #endif
     

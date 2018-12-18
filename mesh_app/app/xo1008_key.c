@@ -11,7 +11,11 @@ static os_timer_t g_xo1008_key_timer;
 static uint8_t ICACHE_FLASH_ATTR
 xo1008_key_state(void)
 {
+#ifdef DL2106F
+    if(GPIO_LOW == honyar_gpio_get_input(XO1008_KEY_LOGIC_PIN)) {
+#else
     if(GPIO_HIGH == honyar_gpio_get_input(XO1008_KEY_LOGIC_PIN)) {
+#endif
         return PRESS_UP;
     }
     return PRESS_DOWN;
@@ -20,7 +24,7 @@ xo1008_key_state(void)
 static void ICACHE_FLASH_ATTR
 xo1008_key_task(void *arg)
 {
-    static uint8_t key_state_his = 0;
+    static uint8_t key_state_his = PRESS_UP;
     uint8_t key_state_cur = xo1008_key_state();
     static uint32_t press_time = 0;
     uint32_t cur_time = system_get_time();
@@ -39,9 +43,11 @@ xo1008_key_task(void *arg)
             return;
         }
     } else if(PRESS_DOWN == key_state_cur) {
+        hy_info("press event\r\n");
         press_time = system_get_time();
     } else {
         if(cur_time - press_time < SHORT_PRESS_TIME_MIN) {
+            hy_info("too short\r\n");
             //ignore; maybe incorrect operation 
         } else if(cur_time - press_time < SHORT_PRESS_TIME_MAX) {
             // short press;

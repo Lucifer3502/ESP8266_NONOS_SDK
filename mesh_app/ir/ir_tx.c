@@ -158,17 +158,13 @@ static void ir_tx_carrier_clr()
     uint8_t pin_num = honyar_gpio_find(DELAN_IR_TX_PIN_NUM);
     uint32_t pin_mux;
     uint32_t pin_fun;
-    if(PIN_IO_NONE == pin_num)
-    {
+    if(PIN_IO_NONE == pin_num){
         return;
     }
     pin_mux = GPIO_PIN_REG(pin_num);
-    if ((0x1 << pin_num) & (GPIO_Pin_0 | GPIO_Pin_2 | GPIO_Pin_4 | GPIO_Pin_5))
-    {
+    if ((0x1 << pin_num) & (GPIO_Pin_0 | GPIO_Pin_2 | GPIO_Pin_4 | GPIO_Pin_5)){
          pin_fun = 0;
-    }
-    else
-    {
+    } else {
          pin_fun = 3;
     }
 
