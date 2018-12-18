@@ -47,10 +47,15 @@ xo1008_uart_protocol_parse(uint8_t *frame, uint32_t frame_len)
             return -1;
 #endif
         }else if(0x02 == child_cmd) {
+#ifdef DL2106F
             if(dl_irda_send(&frame[12], frame_len - 12 - 1, frame[11])) {
             	hy_error("irda send err\r\n");
                 return -1;
             }
+#else 
+            hy_error("not support infared control\r\n");
+            return -1;
+#endif
         } else {
             return -1;
         }
@@ -131,6 +136,8 @@ xo1008_upload_elec(uint32_t energy, uint32_t power, uint32_t voltage, uint32_t c
     buf[1] = len;
     buf[len++] = checksum(buf + 1, len - 1);
     xo1008_net_upload(buf, len);
+
+    return 0;
 }
 
 static int32_t ICACHE_FLASH_ATTR
@@ -214,7 +221,7 @@ xo1008_modbus_read_elec_current(uint32_t *value)
 
 
 static void ICACHE_FLASH_ATTR
-xo1008_modbus_task(uint32_t *value)
+xo1008_uart_task(uint32_t *value)
 {
     uint32_t energe = 0;
     uint32_t power = 0;
@@ -225,18 +232,26 @@ xo1008_modbus_task(uint32_t *value)
     if(honyar_global_timer_is_disable()) {
         return;
     }
-    
+#ifdef DL2106F
+    energe = dl2106f_get_electricity_energe() / 10;
+    power = dl2106f_get_electricity_cur_power() * 10;
+    voltage = dl2106f_get_socket_cur_voltage() * 10;
+    //only if V > 10v
+    if(voltage > 1000) {
+        current = (power * 100) / voltage;
+    }
+#else
     err += xo1008_modbus_read_elec_energy(&energe);
     err += xo1008_modbus_read_elec_power(&power);
-    err += xo1008_modbus_read_elec_voltage(&power);
-    err += xo1008_modbus_read_elec_current(&power);
-
+    err += xo1008_modbus_read_elec_voltage(&voltage);
+    err += xo1008_modbus_read_elec_current(&current);
+#endif
     if(0 == err) {
         hy_info("energy: %u, power: %u, voltage: %u, current: %u\r\n", energe, power, voltage, current);
         xo1008_upload_elec(energe, power, voltage, current);
     } else {
         hy_error("read elec info failed, err = %d\r\n", err);
-        xo1008_upload_elec(energe, power, voltage, current);
+        //xo1008_upload_elec(energe, power, voltage, current);
     }
 
     os_timer_arm(&g_xo1008_modbus_timer, 60000, false);
@@ -250,7 +265,7 @@ xo1008_uart_init(void)
     UART_SetParity(UART0, EVEN_BITS);
 
     os_timer_disarm(&g_xo1008_modbus_timer);
-    os_timer_setfn(&g_xo1008_modbus_timer, (os_timer_func_t *)xo1008_modbus_task, NULL);
-    os_timer_arm(&g_xo1008_modbus_timer, 60000, false);
+    os_timer_setfn(&g_xo1008_modbus_timer, (os_timer_func_t *)xo1008_uart_task, NULL);
+    os_timer_arm(&g_xo1008_modbus_timer, 5000, false);
 }
 

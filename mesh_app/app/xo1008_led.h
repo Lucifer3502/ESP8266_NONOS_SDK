@@ -8,8 +8,6 @@
 //led2: blue
 #define XO1008_LED1_LOGIC_PIN  19
 #define XO1008_LED2_LOGIC_PIN  16
-
-
 #else
 #define XO1008_LED1_LOGIC_PIN  21
 #define XO1008_LED2_LOGIC_PIN  19

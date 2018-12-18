@@ -3,7 +3,11 @@
 
 #include "honyar_types.h"
 
+#ifdef DL2106F
 #define XO1008_KEY_LOGIC_PIN  20
+#else
+#define XO1008_KEY_LOGIC_PIN  20
+#endif
 
 enum {
     PRESS_UP = 0,

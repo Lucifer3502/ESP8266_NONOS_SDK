@@ -22,23 +22,19 @@ static IR_DATA_MODE_E g_ir_data_mode = IR_UNKNOWN_MODE;
 #if (DELAN_IR_SELECT == DELAN_IR_SIGMA_DELTA)
 /*‘ÿ≤®38k*/
 static void ICACHE_FLASH_ATTR
-gen_carrier_clk()
+gen_carrier_clk(void)
 {
 #if 1
     uint8_t pin_num = honyar_gpio_find(DELAN_IR_TX_PIN_NUM);
     uint32_t pin_mux;
     uint32_t pin_fun;
-    if(PIN_IO_NONE == pin_num)
-    {
+    if(PIN_IO_NONE == pin_num) {
         return;
     }
     pin_mux = GPIO_PIN_REG(pin_num);
-    if ((0x1 << pin_num) & (GPIO_Pin_0 | GPIO_Pin_2 | GPIO_Pin_4 | GPIO_Pin_5))
-    {
+    if ((0x1 << pin_num) & (GPIO_Pin_0 | GPIO_Pin_2 | GPIO_Pin_4 | GPIO_Pin_5)) {
          pin_fun = 0;
-    }
-    else
-    {
+    } else {
          pin_fun = 3;
     }
 #else
@@ -51,12 +47,11 @@ gen_carrier_clk()
 
 
 static void ICACHE_FLASH_ATTR
-ir_tx_carrier_clr()
+ir_tx_carrier_clr(void)
 {
 #if 1
     uint8_t pin_num = honyar_gpio_find(DELAN_IR_TX_PIN_NUM);
-    if(PIN_IO_NONE == pin_num)
-    {
+    if(PIN_IO_NONE == pin_num) {
         return;
     }
 #else
@@ -153,7 +148,8 @@ static void gen_carrier_clk()
 
 }
 
-static void ir_tx_carrier_clr()
+static void ICACHE_FLASH_ATTR
+ir_tx_carrier_clr(void)
 {
     uint8_t pin_num = honyar_gpio_find(DELAN_IR_TX_PIN_NUM);
     uint32_t pin_mux;

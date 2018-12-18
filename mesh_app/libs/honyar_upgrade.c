@@ -288,11 +288,11 @@ static int32_t update_download_process(uint8_t *buf, uint32_t buf_len)
         
         if(_gp_update_cfg_patch)
         {
-            //dl_printf("Add patch config.\r\n");
-            //dl_config_commit_patch(_gp_update_cfg_patch, _g_pota_head->cfg_len);
+            hy_info("Add patch config.\r\n");
+            dl_config_commit_patch(_gp_update_cfg_patch, _g_pota_head->cfg_len);
             honyar_free(_gp_update_cfg_patch);
             _gp_update_cfg_patch = NULL;
-            //dl_config_commit_disable(1);
+            dl_config_commit_disable(1);
         } else {
             hy_info("No patch config.\r\n");
         }
