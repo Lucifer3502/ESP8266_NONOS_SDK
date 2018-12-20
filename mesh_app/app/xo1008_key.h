@@ -6,7 +6,7 @@
 #ifdef DL2106F
 #define XO1008_KEY_LOGIC_PIN  20
 #else
-#define XO1008_KEY_LOGIC_PIN  20
+#define XO1008_KEY_LOGIC_PIN  16
 #endif
 
 enum {

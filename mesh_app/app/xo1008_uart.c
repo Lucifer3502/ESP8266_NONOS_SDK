@@ -261,8 +261,11 @@ xo1008_uart_task(uint32_t *value)
 int32_t ICACHE_FLASH_ATTR
 xo1008_uart_init(void)
 {
+#ifdef DL2106F
+#else
     honyar_uart_init(BIT_RATE_9600);
     UART_SetParity(UART0, EVEN_BITS);
+#endif
 
     os_timer_disarm(&g_xo1008_modbus_timer);
     os_timer_setfn(&g_xo1008_modbus_timer, (os_timer_func_t *)xo1008_uart_task, NULL);
