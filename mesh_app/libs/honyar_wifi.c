@@ -4,7 +4,7 @@
 
 static wifi_station_status_cb_t g_wifi_station_status_cb;
 
-static uint8_t g_wifi_work_status = WIFI_SMARTCONFIG_STATUS;
+static uint8_t g_wifi_work_status = WIFI_STA_STATUS;
 static uint8_t g_wifi_router_ssid[WIFI_SSID_LEN + 4] = WIFI_SSID_DEF;
 static uint8_t g_wifi_router_passwd[WIFI_PASSWD_LEN + 4] = WIFI_PWD_DEF;
 

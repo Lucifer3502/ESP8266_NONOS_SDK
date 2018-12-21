@@ -136,7 +136,7 @@ xo1008_upload_elec(uint32_t energy, uint32_t power, uint32_t voltage, uint32_t c
     buf[1] = len;
     buf[len++] = checksum(buf + 1, len - 1);
     xo1008_net_upload(buf, len);
-
+    
     return 0;
 }
 
@@ -163,7 +163,7 @@ xo1008_modbus_read_elec_parm(uint32_t *value, uint16_t func)
     buf[len++] = crc & 0xff;
     buf[len++] = (crc >> 8) & 0xff;
     honyar_uart_write(buf, len);
-
+    //hex_printf("uart write:", buf, len);
     if(0 == honyar_uart_read(buf, 1, 150, 1)) {
         return -1;
     }
@@ -171,10 +171,12 @@ xo1008_modbus_read_elec_parm(uint32_t *value, uint16_t func)
     if(rbytes != 8) {
         return -1;
     }
+    //hex_printf("uart read:", buf, rbytes + 1);
     if(0x03 != buf[1] || 0x04 != buf[2]) {
         return -1;
     }
-    crc = buf[7] | (buf[8] >> 8);
+    crc = buf[7] | (buf[8] << 8);
+    //hy_debug("crc = 0x%04x\r\n", crc);
     if(crc != modbus_crc16(buf, 7)) {
         hy_error("modbus crc check failed.\r\n");
         return -1;

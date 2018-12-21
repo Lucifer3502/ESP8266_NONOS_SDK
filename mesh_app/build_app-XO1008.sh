@@ -11,7 +11,7 @@ export CONF_PATH=$APP_PATH/config
 
 MODULE="XO1008"
 FROM_SW_VER=1.0.0
-SW_VER="1.0.0"
+SW_VER="1.0.1"
 HW_VER=$MODULE
 
 cp ./Makefile_XO1008 ./Makefile -f
