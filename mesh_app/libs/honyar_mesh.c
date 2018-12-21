@@ -43,7 +43,7 @@ honyar_mesh_topo_proto_parser(const void *mesh_header, uint8_t *pdata, uint16_t 
         dev_mac = option->ovalue;
         list = (struct mesh_device_mac_type *)dev_mac;
         for(i = 0; i < dev_count; i++) {
-            mesh_device_add(list + i);
+            mesh_device_add(list + i, MESH_NODE_ALL);
         }
     }
 
@@ -186,14 +186,16 @@ honyar_mesh_topo_query(struct espconn *network)
         uint16_t sub_dev_count = 0;
         uint16_t i = 0;
         struct mesh_device_mac_type *list = NULL;
-        if (!espconn_mesh_get_node_info(MESH_NODE_ALL, &sub_dev_mac, &sub_dev_count))
+        if (!espconn_mesh_get_node_info(MESH_NODE_ALL, &sub_dev_mac, &sub_dev_count)) {
+            hy_error("get mesh all node failed\r\n");
             return;
-        // the first one is mac address of router
+        }
+        // the first one is mac address of root
         //mesh_disp_sub_dev_mac(sub_dev_mac, sub_dev_count);
         mesh_device_set_root((struct mesh_device_mac_type *)src);
         list = (struct mesh_device_mac_type *)sub_dev_mac;
         for(i = 0; i < sub_dev_count - 1; i++) {
-            mesh_device_add(list + 1 + i);
+            mesh_device_add(list + 1 + i, MESH_NODE_ALL);
         }
 
         mesh_device_disp_mac_list();
@@ -245,6 +247,56 @@ TOPO_FAIL:
     option ? os_free(option) : 0;
     header ? os_free(header) : 0;
 }
+
+void ICACHE_FLASH_ATTR
+honyar_mesh_child_query(struct espconn *network)
+{
+    uint8_t *sub_dev_mac = NULL;
+    uint16_t sub_dev_count = 0;
+    uint16_t i = 0;
+    struct mesh_device_mac_type *list = NULL;
+    if (!espconn_mesh_get_node_info(MESH_NODE_CHILD, &sub_dev_mac, &sub_dev_count)) {
+        hy_error("get mesh child node failed\r\n");
+        return;
+    }
+    hy_info("child count: %d\r\n", sub_dev_count);
+    list = (struct mesh_device_mac_type *)sub_dev_mac;
+    for(i = 0; i < sub_dev_count; i++) {
+        mesh_device_add(list + i, MESH_NODE_CHILD);
+    }
+
+    mesh_device_disp_child_list();
+
+    // release memory occupied by mac address.
+    espconn_mesh_get_node_info(MESH_NODE_CHILD, NULL, NULL); 
+    return;
+}
+
+void ICACHE_FLASH_ATTR
+honyar_mesh_parent_query(struct espconn *network)
+{
+    uint8_t *sub_dev_mac = NULL;
+    uint16_t sub_dev_count = 0;
+    struct mesh_device_mac_type *list = NULL;
+
+    if (espconn_mesh_is_root()) {
+        return;
+    }
+    if (!espconn_mesh_get_node_info(MESH_NODE_PARENT, &sub_dev_mac, &sub_dev_count)) {
+        hy_error("get mesh parent node failed\r\n");
+        return;
+    }
+    hy_info("parent count: %d\r\n", sub_dev_count);
+    list = (struct mesh_device_mac_type *)sub_dev_mac;
+    mesh_device_set_parent(list);
+
+    mesh_device_disp_child_list();
+
+    // release memory occupied by mac address.
+    espconn_mesh_get_node_info(MESH_NODE_PARENT, NULL, NULL); 
+    return;
+}
+
 
 void ICACHE_FLASH_ATTR
 honyar_mesh_config_regist(void)
