@@ -169,3 +169,4 @@ xo1008_led_init(void)
     os_timer_setfn(&g_xo1008_led_timer, (os_timer_func_t *)xo1008_led_task, NULL);
     os_timer_arm(&g_xo1008_led_timer, 10, false);
 }
+

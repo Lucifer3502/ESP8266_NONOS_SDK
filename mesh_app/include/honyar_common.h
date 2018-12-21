@@ -34,5 +34,6 @@
 #include "mesh_device.h"
 #include "honyar_device.h"
 #include "infared/honyar_ir.h"
+#include "at.h"
 
 #endif

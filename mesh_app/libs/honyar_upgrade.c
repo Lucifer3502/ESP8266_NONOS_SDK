@@ -325,6 +325,11 @@ int32_t ICACHE_FLASH_ATTR hy_update_download(uint8_t *buf, uint32_t buf_len, uin
     }
 }
 
+void ICACHE_FLASH_ATTR hy_update_init(void)
+{
+    _g_update_total_len = 0;
+}
+
 int32_t ICACHE_FLASH_ATTR try_upgrading_lock(void)
 {
     if(g_upgrade_lock) {

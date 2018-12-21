@@ -4,8 +4,8 @@
 #include "honyar_types.h"
 
 #ifdef DL2106F
-//led1: orange yellow
-//led2: blue
+//led1: blue
+//led2: orange yellow
 #define XO1008_LED1_LOGIC_PIN  19
 #define XO1008_LED2_LOGIC_PIN  16
 #else

@@ -57,6 +57,15 @@ dl2106f_set_socket_power(uint8_t state)
     dl_config_commit_later();
 }
 
+void ICACHE_FLASH_ATTR
+dl2106f_set_socket_power_reverse(void)
+{
+    if(POWER_ON == dl2106f_get_socket_power_state()) {
+        dl2106f_set_socket_power(POWER_OFF);
+    } else {
+        dl2106f_set_socket_power(POWER_ON);
+    }
+}
 
 uint32_t ICACHE_FLASH_ATTR
 dl2106f_get_electricity_energe(void)

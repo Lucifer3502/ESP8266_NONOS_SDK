@@ -1,7 +1,5 @@
 #include "honyar_common.h"
 
-#define WIFI_SSID_DEF "zhihe_test"
-#define WIFI_PWD_DEF "12345678"
 
 
 static wifi_station_status_cb_t g_wifi_station_status_cb;
@@ -107,7 +105,6 @@ honyar_wifi_set_router_passwd(uint8_t *passwd)
     os_strncpy(g_wifi_router_passwd, passwd, WIFI_PASSWD_LEN);
     return 0;
 }
-
 
 void ICACHE_FLASH_ATTR
 honyar_wifi_config_regist(void)

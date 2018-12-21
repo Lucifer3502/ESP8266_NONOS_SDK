@@ -4,6 +4,9 @@
 
 #include "c_types.h"
 
+#define WIFI_SSID_DEF "X1pP@7ua*gavRV$*YYJb9w"
+#define WIFI_PWD_DEF "00144dev*"
+
 #define WIFI_SSID_LEN 32
 #define WIFI_PASSWD_LEN 64
 #define WIFI_SCAN_AP_MAX_NUM 32

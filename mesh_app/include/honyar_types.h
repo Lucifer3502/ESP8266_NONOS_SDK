@@ -7,6 +7,7 @@
 #include "osapi.h"
 
 #define HONYAR_ARRAY_SIZE(array)		(sizeof(array) / sizeof((array)[0]))
+#define MACSTR2 "%02X:%02X:%02X:%02X:%02X:%02X"
 
 #if 1
 #define hy_printf(fmt, ...)  os_printf(fmt, ##__VA_ARGS__)

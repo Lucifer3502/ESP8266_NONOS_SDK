@@ -38,5 +38,7 @@ int32_t upgrading_unlock(void);
 
 void wait_upgrade_reboot(void);
 
+void hy_update_init(void);
+
 #endif
 

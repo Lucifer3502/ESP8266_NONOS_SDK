@@ -63,7 +63,7 @@ int32_t ICACHE_FLASH_ATTR dl_config_query_item(const char *name, char *pvalue, u
 	{
 		if (NULL != g_config_item_reg[i].name)
 		{
-			if (!strcmp(g_config_item_reg[i].name, name))
+			if (!os_strcmp(g_config_item_reg[i].name, name))
 			{
 				_dl_config_commit_inter(&g_config_item_reg[i], pvalue, buf_len);
 				return 0;
@@ -128,7 +128,7 @@ static void ICACHE_FLASH_ATTR _dl_config_commit_inter(DL_CONFIG_ITEM_S *pitem, c
 	switch (pitem->type)
 	{
 	case DL_CFG_ITEM_TYPE_STRING:
-		strncpy(pvalue, pitem->pvalue, buf_len - 1);
+		os_strncpy(pvalue, pitem->pvalue, buf_len - 1);
 		break;
 
 	case DL_CFG_ITEM_TYPE_DEC32:
@@ -172,7 +172,7 @@ int32_t ICACHE_FLASH_ATTR _dl_config_modify_inter(DL_CONFIG_ITEM_S *pitem, const
 {
 	int32_t ret = -1;
 	
-	if (!strcmp(pitem->name, name))
+	if (!os_strcmp(pitem->name, name))
 	{
 		hy_printf(">%s=%s\r\n", name, value);
 		
@@ -187,9 +187,9 @@ int32_t ICACHE_FLASH_ATTR _dl_config_modify_inter(DL_CONFIG_ITEM_S *pitem, const
 		switch (pitem->type)
 		{
 		case DL_CFG_ITEM_TYPE_STRING:
-			if (strcmp(pitem->pvalue, value))
+			if (os_strcmp(pitem->pvalue, value))
 			{
-				strncpy(pitem->pvalue, value, (pitem->value_len - 1));
+				os_strncpy(pitem->pvalue, value, (pitem->value_len - 1));
 				g_config_commit_flag = 1;
 			}
 			break;
@@ -434,7 +434,7 @@ void ICACHE_FLASH_ATTR dl_config_for_each_in_flash(CONFIG_FOR_EACH_FUNC func)
 		
 		i += os_strlen(item_name) + 1;
 
-		if (!strcmp(item_name, cfg_tail))
+		if (!os_strcmp(item_name, cfg_tail))
 		{
 			/* 已经到结尾了 */
 			hy_printf("--No more config data!--!\r\n");

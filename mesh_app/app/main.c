@@ -49,6 +49,7 @@ user_wifi_init(void *parm)
     } else if(WIFI_STA_STATUS == status) {
         honyar_wifi_station_start(honyar_wifi_get_router_ssid(), honyar_wifi_get_router_passwd());
         xo1008_upgrade_init();
+        at_app_init();
         xo1008_led_set_work_mode(WIFI_STA_STATUS);
     } else if(WIFI_SMARTCONFIG_STATUS == status) {
         honyar_ilink_init();

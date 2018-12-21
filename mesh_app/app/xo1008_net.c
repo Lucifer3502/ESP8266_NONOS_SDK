@@ -9,7 +9,7 @@
 
 
 #define XO1008_HEARTBEART_TIME 30000
-#define MACSTR2 "%02X:%02X:%02X:%02X:%02X:%02X"
+
 
 typedef enum {
     MESH_HEARTBEAT = 0x00,
@@ -233,6 +233,7 @@ xo1008_net_recv(uint8_t *data, uint32_t len)
             break;
         }
         err = xo1008_upgrade_set_url(item->valuestring);
+        xo1008_upgrade_enable();
         xo1008_device_upgrade_resp(err);
         if(0 == err) {
             honyar_wifi_set_work_status(WIFI_STA_STATUS);

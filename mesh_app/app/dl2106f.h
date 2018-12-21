@@ -18,6 +18,8 @@ uint8_t dl2106f_get_socket_power_state(void);
 
 void dl2106f_set_socket_power(uint8_t state);
 
+void dl2106f_set_socket_power_reverse(void);
+
 uint32_t dl2106f_get_electricity_energe(void);
 
 uint32_t dl2106f_get_electricity_cur_power(void);
