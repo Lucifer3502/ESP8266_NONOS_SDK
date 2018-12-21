@@ -98,6 +98,13 @@ at_read_config(uint32_t argc, uint8_t *argv[])
 }
 
 static int32_t ICACHE_FLASH_ATTR
+at_mesh_topology_show(uint32_t argc, uint8_t *argv[])
+{
+    mesh_device_disp_mac_list();
+    return 0;
+}
+
+static int32_t ICACHE_FLASH_ATTR
 at_app_output(uint8_t *buf, uint32_t buf_len)
 {
     return at_udp_send(buf, buf_len);
@@ -119,6 +126,7 @@ static at_table_t at_tables[] = {
     {"SCAN", at_scan},
     {"WRCONF", at_write_config},
     {"RDCONF", at_read_config},
+    {"MESHTOP", at_read_config},
 };
 
 void ICACHE_FLASH_ATTR

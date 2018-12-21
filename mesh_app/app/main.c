@@ -43,6 +43,7 @@ user_wifi_init(void *parm)
         dl_ir_tx_init();
         dl2106f_init();
     #endif
+        at_app_init();
         xo1008_uart_init();
         xo1008_net_init();
         xo1008_led_set_work_mode(WIFI_MESH_STATUS);
