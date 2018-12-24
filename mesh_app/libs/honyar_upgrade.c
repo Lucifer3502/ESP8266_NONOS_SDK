@@ -27,7 +27,7 @@ uint32_t get_upgrade_bin_addr(void)
     }
 }
 
-LOCAL int32_t check_update_user_bin(T_OTA_BIN_S *pota_head, uint32_t addr)
+static int32_t check_update_user_bin(T_OTA_BIN_S *pota_head, uint32_t addr)
 {
     if(USER2_ADDR == addr) {
         _g_update_start_recv_len = pota_head->user2_bin_offset;
@@ -351,3 +351,4 @@ void ICACHE_FLASH_ATTR wait_upgrade_reboot(void)
     system_upgrade_flag_set(UPGRADE_FLAG_FINISH);
     system_upgrade_reboot();
 }
+

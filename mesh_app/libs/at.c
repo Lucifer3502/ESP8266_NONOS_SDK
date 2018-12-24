@@ -3,23 +3,23 @@
 #include "honyar_common.h"
 
 
-static at_output_func_t g_at_output_func = NULL;
+static at_write_func_t g_at_write_func = NULL;
 static at_table_t *g_at_table;
 static uint32_t g_table_size;
 
 int32_t ICACHE_FLASH_ATTR
-at_output(uint8_t *buf, uint32_t buf_len)
+at_write(uint8_t *buf, uint32_t buf_len)
 {
-    if(g_at_output_func)
+    if(g_at_write_func)
     {
-        return g_at_output_func(buf, buf_len);
+        return g_at_write_func(buf, buf_len);
     }
 }
 
 void ICACHE_FLASH_ATTR
-at_output_regist(at_output_func_t func)
+at_write_regist(at_write_func_t func)
 {
-    g_at_output_func = func;
+    g_at_write_func = func;
 }
 
 static int32_t ICACHE_FLASH_ATTR

@@ -105,7 +105,7 @@ at_mesh_topology_show(uint32_t argc, uint8_t *argv[])
 }
 
 static int32_t ICACHE_FLASH_ATTR
-at_app_output(uint8_t *buf, uint32_t buf_len)
+at_app_write(uint8_t *buf, uint32_t buf_len)
 {
     return at_udp_send(buf, buf_len);
 }
@@ -114,7 +114,7 @@ static void ICACHE_FLASH_ATTR
 at_app_task(void *args)
 {
     if(STATION_GOT_IP == wifi_station_get_connect_status()) {
-        at_output_regist(at_app_output);
+        at_write_regist(at_app_write);
         at_udp_init();
         honyar_del_task(at_app_task);
     }
