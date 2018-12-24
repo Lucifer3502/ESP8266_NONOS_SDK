@@ -252,17 +252,17 @@ void ICACHE_FLASH_ATTR
 honyar_mesh_child_query(struct espconn *network)
 {
     uint8_t *sub_dev_mac = NULL;
-    uint16_t sub_dev_count = 0;
+    uint16_t sub_dev_count = espconn_mesh_get_sub_dev_count();
     uint16_t i = 0;
-    struct mesh_device_mac_type *list = NULL;
+    struct mesh_sub_node_info *list = NULL;
     if (!espconn_mesh_get_node_info(MESH_NODE_CHILD, &sub_dev_mac, &sub_dev_count)) {
         hy_error("get mesh child node failed\r\n");
         return;
     }
     hy_info("child count: %d\r\n", sub_dev_count);
-    list = (struct mesh_device_mac_type *)sub_dev_mac;
+    list = (struct mesh_sub_node_info *)sub_dev_mac;
     for(i = 0; i < sub_dev_count; i++) {
-        mesh_device_add(list + i, MESH_NODE_CHILD);
+        mesh_device_add((struct mesh_device_mac_type *)((list + i)->mac), MESH_NODE_CHILD);
     }
 
     mesh_device_disp_child_list();
