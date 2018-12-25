@@ -32,6 +32,14 @@ user_config_regist(void)
 }
 
 static void ICACHE_FLASH_ATTR
+wifi_ilink_success_cb(void)
+{
+    honyar_wifi_set_work_status(WIFI_MESH_STATUS);
+    dl_config_commit_later();
+    dl_config_commit(0);
+}
+
+static void ICACHE_FLASH_ATTR
 user_wifi_init(void *parm)
 {
     uint8_t status = honyar_wifi_get_work_status();
@@ -53,6 +61,7 @@ user_wifi_init(void *parm)
         at_app_init(WIFI_STA_STATUS);
         xo1008_led_set_work_mode(WIFI_STA_STATUS);
     } else if(WIFI_SMARTCONFIG_STATUS == status) {
+        honyar_ilink_regist_success_cb(wifi_ilink_success_cb);
         honyar_ilink_init();
         honyar_wifi_set_work_status(WIFI_STA_STATUS);
         dl_config_commit_later();

@@ -230,6 +230,10 @@ typedef struct __I_LINK_CONNECT_WIFI_FRAME_HEAD_SHORT_STR
 
 #pragma pack()
 
+typedef void (*honyar_ilink_success_cb_t)(void);
+
+void honyar_ilink_regist_success_cb(honyar_ilink_success_cb_t func);
+
 void honyar_ilink_init(void);
 
 #endif

@@ -111,6 +111,7 @@ I_LINK_CONNECT_WIFI_FRAME_HEAD_SHORT_STR *_g_pilink_recv_buf = NULL;
 
 uint32_t _g_ilink_buf_tail = 0;
 uint32_t _g_ilink_buf_head = 0;
+static honyar_ilink_success_cb_t g_ilink_success_cb;
 
 
 int InitMonStr( void );
@@ -998,9 +999,10 @@ LOCAL void honyar_ilink_task(void *ppara)
 
                 honyar_wifi_set_router_ssid(g_StaMulticastStr.Ssid);
                 honyar_wifi_set_router_passwd(g_StaMulticastStr.Pwd);
-  
-                //wifi_config_success();
                 dl_config_commit_later();
+                if(g_ilink_success_cb) {
+                    g_ilink_success_cb();
+                }
                 dl_config_commit(0);
                 honyar_sys_reboot(0);
                 honyar_del_task(honyar_ilink_task);
@@ -1054,6 +1056,12 @@ _honyar_ilink_init(void *parm)
     wifi_set_channel(ChnGruop[CurrentGroupPoint]);
     hy_printf("channel: %d\r\n", ChnGruop[CurrentGroupPoint]);
     honyar_add_task(honyar_ilink_task, NULL, 0);
+}
+
+void ICACHE_FLASH_ATTR
+honyar_ilink_regist_success_cb(honyar_ilink_success_cb_t func)
+{
+    g_ilink_success_cb = func;
 }
 
 void ICACHE_FLASH_ATTR 
