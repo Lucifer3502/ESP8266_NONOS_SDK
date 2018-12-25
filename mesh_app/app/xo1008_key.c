@@ -4,9 +4,7 @@
 //UNIT: us
 #define SHORT_PRESS_TIME_MIN  30000
 #define SHORT_PRESS_TIME_MAX  1000000
-#define LONG_PRESS_TIME_MIN   3000000
-#define LONG_PRESS_TIME_MAX   6000000
-#define LONGLONG_PRESS_TIME_MIN   12000000
+#define LONG_PRESS_TIME_MIN   5000000
 
 
 static os_timer_t g_xo1008_key_timer;
@@ -36,11 +34,11 @@ xo1008_key_task(void *arg)
         return;
     }
     if(key_state_his == key_state_cur) {
-        if(PRESS_DOWN == key_state_his && cur_time - press_time >= LONGLONG_PRESS_TIME_MIN) {
+        if(PRESS_DOWN == key_state_his && cur_time - press_time >= LONG_PRESS_TIME_MIN) {
             hy_info("long long press\r\n");
             honyar_wifi_set_router_ssid(WIFI_SSID_DEF);
             honyar_wifi_set_router_passwd(WIFI_PWD_DEF);
-            honyar_wifi_set_work_status(WIFI_STA_STATUS);
+            honyar_wifi_set_work_status(WIFI_SMARTCONFIG_STATUS);
             dl_config_commit_later();
             dl_config_commit(0);
             honyar_sys_reboot(0);
@@ -57,16 +55,9 @@ xo1008_key_task(void *arg)
             hy_info("short press\r\n");
 #ifdef DL2106F
             dl2106f_set_socket_power_reverse();
+#else
+    
 #endif
-        } else if((cur_time - press_time < LONG_PRESS_TIME_MAX)
-                && (cur_time - press_time >= LONG_PRESS_TIME_MIN)) {
-            // long press;
-            hy_info("long press\r\n");
-            honyar_wifi_set_work_status(WIFI_SMARTCONFIG_STATUS);
-            dl_config_commit_later();
-            dl_config_commit(1);
-            honyar_sys_reboot(0);
-            return;
         }
     }
     

@@ -4,6 +4,6 @@
 
 #include "honyar_types.h"
 
-void at_app_init(void);
+void at_app_init(uint8_t wifi_mode);
 
 #endif

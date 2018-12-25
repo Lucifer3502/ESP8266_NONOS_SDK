@@ -1,6 +1,8 @@
 
 #include "honyar_common.h"
 #include "xo1008_led.h"
+#include "dl2106f.h"
+#include "xo1008_device.h"
 
 static uint8_t g_xo1008_led1_state;
 static uint8_t g_xo1008_led2_state;
@@ -56,6 +58,7 @@ xo1008_led2_reverse(void)
     }
 }
 
+#if 0
 static void ICACHE_FLASH_ATTR
 xo1008_led_sta_mode(void)
 {
@@ -80,40 +83,105 @@ xo1008_led_sta_mode(void)
             last_run_time = cur_time;
         }
     }
-    
 }
+#else
+static void ICACHE_FLASH_ATTR
+xo1008_led_sta_mode(void)
+{
+#define STA_INT  2000000
+    static uint32_t last_run_time = 0;
+    uint32_t cur_time = system_get_time();
+    if(cur_time - last_run_time > STA_INT) {
+        last_run_time = cur_time;
+        if(LED_OFF == g_xo1008_led1_state) {
+            xo1008_led1_on();
+            xo1008_led2_off();
+        } else {
+            xo1008_led1_off();
+            xo1008_led2_on();
+        }
+    }
+}
+
+#endif
 
 static void ICACHE_FLASH_ATTR
 xo1008_led_mesh_mode(void)
 {
-#define MESH_IS_INVALID_INT 200000
+#define MESH_IS_INVALID_INT 2000000
 #define MESH_NETWORK_NOT_CONNET_INT  200000
-    static uint32_t last_led1_run_time = 0;
-    static uint32_t last_led2_run_time = 0;
+    static uint32_t last_run_time = 0;
     uint32_t cur_time = system_get_time();
-
-    if(honyar_mesh_is_valid()) {
-        xo1008_led2_on();
-    } else if(cur_time - last_led2_run_time > MESH_IS_INVALID_INT) {
-        xo1008_led2_reverse();
-        last_led2_run_time = cur_time;
-    }
-
+    #ifdef DL2106F
+    uint8_t state = dl2106f_get_socket_power_state();
+    #else
+    uint8_t state = xo1008_device_get_power_state();
+    #endif
+    
     if(mesh_network_isconnected()) {
-        xo1008_led1_on();
-    }else if(cur_time - last_led1_run_time > MESH_IS_INVALID_INT) {
-        xo1008_led1_reverse();
-        last_led1_run_time = cur_time;
+        if(POWER_ON == state) {
+            xo1008_led1_on();
+            if(espconn_mesh_is_root()) {
+                xo1008_led2_on();
+            }else {
+                xo1008_led2_off();
+            }
+        } else {
+            xo1008_led2_on();
+            if(espconn_mesh_is_root()) {
+                xo1008_led1_on();
+            }else {
+                xo1008_led1_off();
+            }
+        }
+    } else if(honyar_mesh_is_valid()) {
+        if(POWER_ON == state) {
+            if(espconn_mesh_is_root()) {
+                xo1008_led2_on();
+            } else {
+                xo1008_led2_off();
+            }
+            if(cur_time - last_run_time > MESH_NETWORK_NOT_CONNET_INT) {
+                xo1008_led1_reverse();
+                last_run_time = cur_time;
+            }
+        } else {
+            if(espconn_mesh_is_root()) {
+                xo1008_led1_on();
+            }
+            else {
+                xo1008_led1_off();
+            }
+            if(cur_time - last_run_time > MESH_NETWORK_NOT_CONNET_INT) {
+                xo1008_led2_reverse();
+                last_run_time = cur_time;
+            }
+        }
+    } else {
+        if(POWER_ON == state) {
+            xo1008_led2_off();
+            if(cur_time - last_run_time > MESH_IS_INVALID_INT) {
+                xo1008_led1_reverse();
+                last_run_time = cur_time;
+                
+            }
+        } else {
+            xo1008_led1_off();
+            if(cur_time - last_run_time > MESH_IS_INVALID_INT) {
+                xo1008_led2_reverse();
+                last_run_time = cur_time;
+            }
+        }
     }
 }
 
 static void ICACHE_FLASH_ATTR
 xo1008_led_smartconfig_mode(void)
 {
-#define SMARTCONFIG_INT 500000
+#define SMARTCONFIG_INT 200000
     static uint32_t last_run_time = 0;
     uint32_t cur_time = system_get_time();
-    if(cur_time - last_run_time > STA_NOT_CONNECT_INT) {
+    if(cur_time - last_run_time > SMARTCONFIG_INT) {
         last_run_time = cur_time;
         if(LED_OFF == g_xo1008_led1_state) {
             xo1008_led1_on();

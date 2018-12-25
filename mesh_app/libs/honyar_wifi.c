@@ -7,6 +7,7 @@ static wifi_station_status_cb_t g_wifi_station_status_cb;
 static uint8_t g_wifi_work_status = WIFI_STA_STATUS;
 static uint8_t g_wifi_router_ssid[WIFI_SSID_LEN + 4] = WIFI_SSID_DEF;
 static uint8_t g_wifi_router_passwd[WIFI_PASSWD_LEN + 4] = WIFI_PWD_DEF;
+static uint8_t g_wifi_sta_mac[MAC_ADDR_LEN];
 
 static uint8_t g_wifi_scan_over_flag;
 static wifi_scan_result_info_t *g_wifi_scan_info = NULL;
@@ -111,6 +112,7 @@ honyar_wifi_config_regist(void)
 {
     DL_CONFIG_ITEM_S config_items[] = 
 	{
+        {"MAC", DL_CFG_ITEM_TYPE_HEX_STR, g_wifi_sta_mac, sizeof(g_wifi_sta_mac), 0},   
         {"CFG_WIFI_WORK_STATUS", DL_CFG_ITEM_TYPE_DEC8, &g_wifi_work_status, sizeof(g_wifi_work_status), 0},
         {"CFG_WIFI_ROUTER_SSID", DL_CFG_ITEM_TYPE_STRING, g_wifi_router_ssid, sizeof(g_wifi_router_ssid), 0},
         {"CFG_WIFI_ROUTER_PASSWD", DL_CFG_ITEM_TYPE_STRING, g_wifi_router_passwd, sizeof(g_wifi_router_passwd), 0},
@@ -122,11 +124,31 @@ honyar_wifi_config_regist(void)
     }
 }
 
+static int32_t ICACHE_FLASH_ATTR
+honyar_wifi_sta_mac_init(void)
+{
+    uint8_t mac[MAC_ADDR_LEN] = {0};
+    if(!os_memcmp(mac, g_wifi_sta_mac, MAC_ADDR_LEN)) {
+        return -1;
+    }
+
+    wifi_set_opmode_current(STATION_MODE);
+    wifi_get_macaddr(STATION_IF, mac);
+    if(os_memcmp(mac, g_wifi_sta_mac, MAC_ADDR_LEN)) {
+        wifi_set_macaddr(STATION_IF, g_wifi_sta_mac);
+        hy_info("set new mac: "MACSTR"\r\n", MAC2STR(g_wifi_sta_mac));
+    }
+
+    return 0;
+}
+
 int32_t ICACHE_FLASH_ATTR
 honyar_wifi_init(void)
 {
     //honyar_wifi_station_start(WIFI_SSID_DEF, WIFI_PWD_DEF);
+    honyar_wifi_sta_mac_init();
     honyar_add_task(honyar_wifi_sta_workstation, NULL, 1000 / TASK_CYCLE_TM_MS);
+    return 0;
 }
 
 uint32_t ICACHE_FLASH_ATTR

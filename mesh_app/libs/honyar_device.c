@@ -11,7 +11,7 @@ honyar_device_config_regist(void)
 {
     DL_CONFIG_ITEM_S config_items[] = 
 	{
-        {"CFG_DEVICE_SN", DL_CFG_ITEM_TYPE_STRING, g_device_sn, sizeof(g_device_sn), 0},
+        {"EQUIPMENT_SN", DL_CFG_ITEM_TYPE_STRING, g_device_sn, sizeof(g_device_sn), 0},
         {"CFG_DEVICE_MODEL", DL_CFG_ITEM_TYPE_STRING, g_device_model, sizeof(g_device_model), 0},
 	};
 

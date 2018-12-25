@@ -4,7 +4,7 @@
 
 #include "c_types.h"
 
-#if 1
+#if 0
 #define WIFI_SSID_DEF "lucifer_E0B0"
 #define WIFI_PWD_DEF "12344321"
 #else

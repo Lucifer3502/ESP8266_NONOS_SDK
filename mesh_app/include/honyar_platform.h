@@ -4,7 +4,7 @@
 
 #include "c_types.h"
 
-#define HONYAR_LIBS_VERSION  "1.0.0"
+#define HONYAR_LIBS_VERSION  "1.1.0"
 
 #define TASK_MAX_NUM  20
 

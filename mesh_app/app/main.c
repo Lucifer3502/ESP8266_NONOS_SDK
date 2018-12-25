@@ -43,18 +43,18 @@ user_wifi_init(void *parm)
         dl_ir_tx_init();
         dl2106f_init();
     #endif
-        at_app_init();
+        at_app_init(WIFI_MESH_STATUS);
         xo1008_uart_init();
         xo1008_net_init();
         xo1008_led_set_work_mode(WIFI_MESH_STATUS);
     } else if(WIFI_STA_STATUS == status) {
         honyar_wifi_station_start(honyar_wifi_get_router_ssid(), honyar_wifi_get_router_passwd());
         xo1008_upgrade_init();
-        at_app_init();
+        at_app_init(WIFI_STA_STATUS);
         xo1008_led_set_work_mode(WIFI_STA_STATUS);
     } else if(WIFI_SMARTCONFIG_STATUS == status) {
         honyar_ilink_init();
-        honyar_wifi_set_work_status(WIFI_MESH_STATUS);
+        honyar_wifi_set_work_status(WIFI_STA_STATUS);
         dl_config_commit_later();
         dl_config_commit(0);
         xo1008_led_set_work_mode(WIFI_SMARTCONFIG_STATUS);

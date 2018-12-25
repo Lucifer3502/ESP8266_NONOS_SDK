@@ -2,6 +2,9 @@
 #include "at_app.h"
 #include "honyar_common.h"
 
+
+static uint8_t g_at_wifi_work_mode;
+
 static int32_t ICACHE_FLASH_ATTR
 self_mac_check(uint8_t *addr)
 {
@@ -22,6 +25,12 @@ self_mac_check(uint8_t *addr)
 static int32_t ICACHE_FLASH_ATTR
 at_reboot(uint32_t argc, uint8_t *argv[])
 {
+    if(argc < 2) {
+        return -1;
+    }
+    if(self_mac_check(argv[1])) {
+        return -1;
+    }
     honyar_sys_reboot(0);
     return 0;
 }
@@ -45,12 +54,62 @@ at_upgrade(uint32_t argc, uint8_t *argv[])
 }
 
 static int32_t ICACHE_FLASH_ATTR
-at_scan(uint32_t argc, uint8_t *argv[])
+mesh_scan(uint32_t argc, uint8_t *argv[])
+{
+    uint32_t i = 0;
+    mesh_device_list_type_t *list = mesh_device_get_all();
+    cJSON *root = cJSON_CreateObject();
+    uint8_t *fmt = NULL;
+    uint8_t macstr[MAC_ADDR_LEN * 3] = {0};
+    cJSON *array = cJSON_CreateArray();
+    if(NULL == root) {
+        return -1;
+    }
+    if(NULL == array) {
+        cJSON_Delete(root);
+        return -1;
+    }
+    if(list->scale < 1) {
+        return -1;
+    }
+    os_sprintf(macstr, MACSTR, MAC2STR(list->root.mac));
+    cJSON_AddItemToObject(root, "root", cJSON_CreateString(macstr));
+    
+    for(i = 0; i < list->scale - 1; i++) {
+        os_sprintf(macstr, MACSTR, MAC2STR(list->list[i].mac));
+        cJSON_AddItemToArray(array, cJSON_CreateString(macstr));
+    }
+    cJSON_AddItemToObject(root, "nodes", array);
+    fmt = cJSON_PrintUnformatted(root);
+    if(!fmt) {
+        cJSON_Delete(root);
+        return -1;
+    }
+
+    AT_PRINTF("%s\r\n", fmt);
+    cJSON_Delete(root);
+    os_free(fmt);
+    return 0;
+}
+
+static int32_t ICACHE_FLASH_ATTR
+sta_scan(uint32_t argc, uint8_t *argv[])
 {
     uint8_t mac[MAC_ADDR_LEN] = {0};
     honyar_wifi_get_macaddr(mac);
     AT_PRINTF(MACSTR"\r\n", MAC2STR(mac));
     return 0;
+}
+
+static int32_t ICACHE_FLASH_ATTR
+at_scan(uint32_t argc, uint8_t *argv[])
+{
+    if(WIFI_MESH_STATUS == g_at_wifi_work_mode) {
+        return mesh_scan(argc, argv);
+    } else if(WIFI_STA_STATUS == g_at_wifi_work_mode) {
+        return sta_scan(argc, argv);
+    }
+    return -1;
 }
 
 static int32_t ICACHE_FLASH_ATTR
@@ -126,12 +185,13 @@ static at_table_t at_tables[] = {
     {"SCAN", at_scan},
     {"WRCONF", at_write_config},
     {"RDCONF", at_read_config},
-    {"MESHTOP", at_read_config},
+    {"MESHTOP", at_mesh_topology_show},
 };
 
 void ICACHE_FLASH_ATTR
-at_app_init(void)
+at_app_init(uint8_t wifi_mode)
 {
+    g_at_wifi_work_mode = wifi_mode;
     at_table_init();
     at_table_regist(at_tables, HONYAR_ARRAY_SIZE(at_tables));
     honyar_add_task(at_app_task, NULL, 1000 / TASK_CYCLE_TM_MS);
