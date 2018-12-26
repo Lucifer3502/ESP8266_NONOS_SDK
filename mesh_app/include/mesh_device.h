@@ -2,10 +2,14 @@
 #define _MESH_DEVICE_H_
 
 #include "honyar_types.h"
+#include "mesh.h"
 
+//unit: us
+#define MESH_DEVICE_FLUSH_TIMEOUT 60000000
 
 struct mesh_device_mac_type {
-    uint8_t mac[6];
+    uint8_t mac[ESP_MESH_ADDR_LEN];
+    uint32_t active_time;
 } __packed;
 
 typedef struct mesh_device_list_type {
@@ -21,6 +25,8 @@ mesh_device_list_type_t *mesh_device_get_child(void);
 
 void mesh_device_list_init(void);
 
+void mesh_device_list_release(void);
+
 void mesh_device_disp_mac_list(void);
 
 void mesh_device_set_root(struct mesh_device_mac_type *root);
@@ -31,12 +37,13 @@ int32_t mesh_search_device(mesh_device_list_type_t *node_list, const struct mesh
 
 int32_t mesh_device_add(struct mesh_device_mac_type *nodes, uint8_t node_type);
 
-int32_t mesh_device_del(struct mesh_device_mac_type *nodes, uint16_t count);
+int32_t mesh_device_del(struct mesh_device_mac_type *nodes, uint16_t count, uint8_t node_type);
 
 int32_t mesh_device_get_root(const struct mesh_device_mac_type **root);
 
 int32_t mesh_device_get_mac_list(const struct mesh_device_mac_type **list, uint16_t *count);
 
+int32_t mesh_device_flush(void);
 
 #endif
 

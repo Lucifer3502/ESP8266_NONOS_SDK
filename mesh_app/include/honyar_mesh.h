@@ -21,7 +21,9 @@ void honyar_mesh_regist_recv_cb(honyar_mesh_recv_handle_t cb);
 
 void honyar_mesh_topo_query(struct espconn *network);
 
-void honyar_mesh_child_query(struct espconn *network);
+void honyar_mesh_child_query(void);
+
+void honyar_mesh_parent_query(void);
 
 void honyar_mesh_get_gid(uint8_t gid[MESH_GROUP_ID_SIZE]);
 

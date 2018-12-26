@@ -189,7 +189,9 @@ mesh_app_topo_task(void *parm)
     hy_info("mesh status: %d - %d\r\n", honyar_mesh_is_valid(), espconn_mesh_get_status());
     if(honyar_mesh_is_valid()) {
         honyar_mesh_topo_query(&g_mesh_network);
-        honyar_mesh_child_query(&g_mesh_network);
+        honyar_mesh_child_query();
+        honyar_mesh_parent_query();
+        mesh_device_flush();
     }
 }
 
