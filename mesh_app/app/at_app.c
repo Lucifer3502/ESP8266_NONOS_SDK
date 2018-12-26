@@ -1,6 +1,8 @@
 
 #include "at_app.h"
 #include "honyar_common.h"
+#include "app_config.h"
+#include "at_udp.h"
 
 
 static uint8_t g_at_wifi_work_mode;
@@ -57,47 +59,83 @@ static int32_t ICACHE_FLASH_ATTR
 mesh_scan(uint32_t argc, uint8_t *argv[])
 {
     uint32_t i = 0;
-    mesh_device_list_type_t *list = mesh_device_get_all();
+    mesh_device_list_type_t *node_list = mesh_device_get_all();
+    mesh_device_list_type_t *child_list = mesh_device_get_child();
     cJSON *root = cJSON_CreateObject();
     uint8_t *fmt = NULL;
     uint8_t macstr[MAC_ADDR_LEN * 3] = {0};
-    cJSON *array = cJSON_CreateArray();
-    if(NULL == root) {
-        return -1;
-    }
-    if(NULL == array) {
-        cJSON_Delete(root);
-        return -1;
-    }
-    if(list->scale < 1) {
-        return -1;
-    }
-    os_sprintf(macstr, MACSTR, MAC2STR(list->root.mac));
-    cJSON_AddItemToObject(root, "root", cJSON_CreateString(macstr));
+    cJSON *nodes = cJSON_CreateArray();
+    cJSON *childs = cJSON_CreateArray();
+    int32_t err = -1;
     
-    for(i = 0; i < list->scale - 1; i++) {
-        os_sprintf(macstr, MACSTR, MAC2STR(list->list[i].mac));
-        cJSON_AddItemToArray(array, cJSON_CreateString(macstr));
+    
+    if(NULL == nodes || NULL == childs) {
+        cJSON_Delete(nodes);
+        cJSON_Delete(childs);
+        goto end;
     }
-    cJSON_AddItemToObject(root, "nodes", array);
-    fmt = cJSON_PrintUnformatted(root);
-    if(!fmt) {
-        cJSON_Delete(root);
-        return -1;
+    if(node_list->scale < 1) {
+        cJSON_Delete(nodes);
+        cJSON_Delete(childs);
+        goto end;
+    }
+    if(NULL == root) {
+        cJSON_Delete(nodes);
+        cJSON_Delete(childs);
+        goto end;
     }
 
+    cJSON_AddItemToObject(root, "sw", cJSON_CreateString(APP_VERSION));
+    os_sprintf(macstr, MACSTR, MAC2STR(node_list->root.mac));
+    cJSON_AddItemToObject(root, "root", cJSON_CreateString(macstr));
+    
+    for(i = 0; i < node_list->scale - 1; i++) {
+        os_sprintf(macstr, MACSTR, MAC2STR(node_list->list[i].mac));
+        cJSON_AddItemToArray(nodes, cJSON_CreateString(macstr));
+    }
+    for(i = 0; i < child_list->scale - 1; i++) {
+        os_sprintf(macstr, MACSTR, MAC2STR(node_list->list[i].mac));
+        cJSON_AddItemToArray(childs, cJSON_CreateString(macstr));
+    }
+    cJSON_AddItemToObject(root, "nodes", nodes);
+    cJSON_AddItemToObject(root, "childs", childs);
+    fmt = cJSON_PrintUnformatted(root);
+    if(!fmt) {
+        goto end;
+    }
+
+    err = 0;
     AT_PRINTF("%s\r\n", fmt);
+end:
     cJSON_Delete(root);
     os_free(fmt);
-    return 0;
+    return err;
 }
 
 static int32_t ICACHE_FLASH_ATTR
 sta_scan(uint32_t argc, uint8_t *argv[])
 {
     uint8_t mac[MAC_ADDR_LEN] = {0};
+    uint8_t macstr[MAC_ADDR_LEN * 3] = {0};
+    cJSON *root = cJSON_CreateObject();
+    uint8_t *fmt = NULL;
+    
+    if(NULL == root) {
+        return -1;
+    }
+    
     honyar_wifi_get_macaddr(mac);
-    AT_PRINTF(MACSTR"\r\n", MAC2STR(mac));
+    os_sprintf(macstr, MACSTR, MAC2STR(mac));
+    cJSON_AddItemToObject(root, "mac", cJSON_CreateString(macstr));
+    cJSON_AddItemToObject(root, "sw", cJSON_CreateString(APP_VERSION));
+    fmt = cJSON_PrintUnformatted(root);
+    if(!fmt) {
+        cJSON_Delete(root);
+        return -1;
+    }
+    AT_PRINTF("%s\r\n", fmt);
+    cJSON_Delete(root);
+    os_free(fmt);
     return 0;
 }
 

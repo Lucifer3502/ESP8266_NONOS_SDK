@@ -109,6 +109,7 @@ honyar_mesh_init(void)
     struct station_config sta_conf;
     
     espconn_mesh_print_ver();
+    mesh_device_list_init();
     
     server.addr = ipaddr_addr(g_mesh_server_ipaddr);
     os_memset(&sta_conf, 0, sizeof(struct station_config));
@@ -320,7 +321,7 @@ uint8_t ICACHE_FLASH_ATTR
 honyar_mesh_is_valid(void)
 {
     uint8_t status = espconn_mesh_get_status();
-    if(MESH_LOCAL_AVAIL != status && MESH_ONLINE_AVAIL != status) {
+    if(MESH_LOCAL_AVAIL != status && MESH_ONLINE_AVAIL != status && MESH_NET_CONN != status) {
         return 0;
     }
 

@@ -108,7 +108,8 @@ mesh_device_get_root(const struct mesh_device_mac_type **root)
     return 0;
 }
 
-void ICACHE_FLASH_ATTR mesh_device_list_release(void)
+void ICACHE_FLASH_ATTR
+mesh_device_list_release(void)
 {
     if (!g_mesh_device_init)
         return;
@@ -120,7 +121,8 @@ void ICACHE_FLASH_ATTR mesh_device_list_release(void)
     os_memset(&g_node_list, 0, sizeof(g_node_list));
 }
 
-void ICACHE_FLASH_ATTR mesh_device_list_init(void)
+void ICACHE_FLASH_ATTR
+mesh_device_list_init(void)
 {
     uint8_t mac[MAC_ADDR_LEN] = {0};
     honyar_wifi_get_macaddr(mac);

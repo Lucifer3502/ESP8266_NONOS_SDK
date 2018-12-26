@@ -11,7 +11,7 @@ export CONF_PATH=$APP_PATH/config
 
 MODULE="DL3020D-16QCM"
 FROM_SW_VER=1.0.0
-SW_VER="1.1.1"
+SW_VER="1.1.2"
 HW_VER=$MODULE
 
 cp ./Makefile_DL2106F ./Makefile -f
